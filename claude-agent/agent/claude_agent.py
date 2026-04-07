@@ -7,9 +7,11 @@ Handles:
   - Parsing structured output (file blocks)
 """
 
+import time
 import anthropic
 from dataclasses import dataclass
 from config import Config
+from agent.token_tracker import TokenTracker
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
@@ -84,6 +86,7 @@ class ClaudeAgent:
             task = progress.add_task("Claude is generating code...", total=None)
 
             try:
+                start_time = time.time()
                 with self.client.messages.stream(
                     model=self.model,
                     max_tokens=self.max_tokens,
@@ -97,6 +100,21 @@ class ClaudeAgent:
                             task,
                             description=f"Claude is generating code... ({len(response_text)} chars)",
                         )
+
+                # Record token usage and cost
+                duration = time.time() - start_time
+                final_message = stream.get_final_message()
+                if final_message and final_message.usage:
+                    tracker = TokenTracker.instance()
+                    tracker.record(
+                        model=self.model,
+                        mode="generate_code",
+                        input_tokens=final_message.usage.input_tokens,
+                        output_tokens=final_message.usage.output_tokens,
+                        duration_seconds=duration,
+                        prompt_preview=prompt[:100] if isinstance(prompt, str) else "(multimodal)",
+                    )
+                    tracker.print_last_call()
 
             except anthropic.APIConnectionError:
                 console.print("[red]❌ Cannot connect to Anthropic API[/red]")
@@ -127,11 +145,27 @@ class ClaudeAgent:
     def chat(self, prompt: str) -> str:
         """Simple chat with Claude — returns text response."""
         try:
+            start_time = time.time()
             message = self.client.messages.create(
                 model=self.model,
                 max_tokens=self.max_tokens,
                 messages=[{"role": "user", "content": prompt}],
             )
+            duration = time.time() - start_time
+
+            # Record token usage
+            if message.usage:
+                tracker = TokenTracker.instance()
+                tracker.record(
+                    model=self.model,
+                    mode="chat",
+                    input_tokens=message.usage.input_tokens,
+                    output_tokens=message.usage.output_tokens,
+                    duration_seconds=duration,
+                    prompt_preview=prompt[:100],
+                )
+                tracker.print_last_call()
+
             return message.content[0].text
         except Exception as e:
             console.print(f"[red]❌ Claude API error: {e}[/red]")

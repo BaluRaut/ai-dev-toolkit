@@ -27,3 +27,9 @@ Thumbs.db
 dist/
 build/
 *.egg
+
+# ChromaDB (RAG vector index)
+.chromadb/
+
+# Token tracker logs
+token_log.json

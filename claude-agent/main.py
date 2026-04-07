@@ -36,6 +36,10 @@ from connectors.figma_connector import FigmaConnector, create_manual_design
 from connectors.api_docs_parser import ApiDocsParser, create_manual_api_docs
 from agent.claude_agent import ClaudeAgent
 from agent.code_generator import CodeGenerator
+from agent.self_healer import SelfHealer, run_self_healing
+from agent.ci_generator import CIGenerator, run_ci_generation
+from agent.token_tracker import TokenTracker
+from agent.rag_engine import RAGEngine, index_codebase, search_codebase
 from templates.prompt_template import (
     build_full_feature_prompt,
     build_code_review_prompt,
@@ -81,8 +85,15 @@ BANNER = """
 @click.option("--stack", help="Override tech stack (e.g., 'Vue 3, TypeScript, Pinia')")
 @click.option("--no-tests", is_flag=True, help="Skip test generation in full workflow")
 @click.option("--base-url", default="http://localhost:3000", help="Base URL for E2E tests")
+@click.option("--heal", help="Self-healing loop: run tests and auto-fix (path to project)")
+@click.option("--heal-framework", default="jest", help="Test framework for --heal (jest, vitest, playwright, pytest)")
+@click.option("--heal-retries", default=3, type=int, help="Max retries for self-healing loop")
+@click.option("--ci", "generate_ci", is_flag=True, help="Generate GitHub Actions CI/CD workflows")
+@click.option("--index", "index_path", help="Index a codebase for RAG search")
+@click.option("--search", "search_query", help="Search indexed codebase (use with --index)")
+@click.option("--costs", is_flag=True, help="Show session cost summary")
 @click.pass_context
-def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url):
+def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url, heal, heal_framework, heal_retries, generate_ci, index_path, search_query, costs):
     """🤖 Claude AI Agent — Generate production code from Jira + Figma + API Docs."""
     console.print(BANNER)
 
@@ -98,7 +109,9 @@ def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test
         return
 
     # Route to appropriate mode
-    if interactive:
+    if costs:
+        TokenTracker.instance().print_session_summary()
+    elif interactive:
         run_interactive_mode(stack)
     elif review:
         run_code_review(review)
@@ -110,6 +123,14 @@ def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test
         run_test_generation(test)
     elif fix:
         run_bug_fix(fix)
+    elif heal:
+        run_heal_mode(heal, heal_framework, heal_retries)
+    elif generate_ci:
+        run_ci_mode(output or ".")
+    elif index_path and search_query:
+        run_rag_search(index_path, search_query)
+    elif index_path:
+        run_rag_index(index_path)
     elif jira or figma or swagger:
         run_full_workflow(jira, figma, swagger, output, api_filter, stack, include_tests=not no_tests)
     else:
@@ -491,6 +512,113 @@ def run_bug_fix(error_input: str):
 
 
 # ─────────────────────────────────────────────────
+# Self-Healing Mode
+# ─────────────────────────────────────────────────
+
+def run_heal_mode(project_dir: str, framework: str = "jest", max_retries: int = 3):
+    """Run tests → if fail → Claude fixes → repeat until pass."""
+    console.print(Panel(
+        f"[bold]🔄 Self-Healing Mode[/bold]\n"
+        f"Project: {project_dir}\n"
+        f"Framework: {framework} | Max retries: {max_retries}",
+        style="cyan",
+    ))
+
+    test_path = Prompt.ask("Specific test file (or Enter for all)", default="")
+    test_path = test_path if test_path else None
+
+    success = run_self_healing(
+        project_dir=project_dir,
+        framework=framework,
+        test_path=test_path,
+        max_retries=max_retries,
+    )
+
+    if success:
+        console.print("\n[bold green]🎉 All tests passing! Self-healing complete.[/bold green]")
+    else:
+        console.print("\n[bold red]❌ Tests still failing after max retries.[/bold red]")
+        console.print("[dim]   💡 Try increasing --heal-retries or manually reviewing the errors[/dim]")
+
+
+# ─────────────────────────────────────────────────
+# CI/CD Generation Mode
+# ─────────────────────────────────────────────────
+
+def run_ci_mode(project_dir: str):
+    """Generate GitHub Actions CI/CD workflows."""
+    console.print(Panel("[bold]⚙️ CI/CD Generator[/bold]", style="cyan"))
+
+    console.print("  Select workflows to generate:")
+    console.print("  [bold]1[/bold]. 🔍 AI Code Review (reviews every PR with Claude)")
+    console.print("  [bold]2[/bold]. 🧪 Auto-Generate Tests (adds tests for untested files)")
+    console.print("  [bold]3[/bold]. 🛡️ Quality Gate (lint + type-check + tests)")
+    console.print("  [bold]4[/bold]. 📦 All of the above")
+
+    choice = Prompt.ask("Choice", choices=["1", "2", "3", "4"], default="4")
+
+    workflow_map = {
+        "1": ["review"],
+        "2": ["tests"],
+        "3": ["quality"],
+        "4": ["review", "tests", "quality"],
+    }
+
+    run_ci_generation(project_dir, workflow_map[choice])
+
+
+# ─────────────────────────────────────────────────
+# RAG Index & Search Modes
+# ─────────────────────────────────────────────────
+
+def run_rag_index(project_dir: str):
+    """Index a codebase for vector search."""
+    console.print(Panel(f"[bold]📚 Indexing Codebase: {project_dir}[/bold]", style="cyan"))
+    stats = index_codebase(project_dir)
+    if stats.total_chunks > 0:
+        console.print(f"\n[bold green]✅ Indexed {stats.total_chunks} chunks from {stats.total_files} files[/bold green]")
+        console.print("[dim]   💡 Now search with: python main.py --index <path> --search \"your query\"[/dim]")
+
+
+def run_rag_search(project_dir: str, query: str):
+    """Search the indexed codebase."""
+    console.print(Panel(f"[bold]🔍 Searching: \"{query}\"[/bold]", style="cyan"))
+
+    engine = RAGEngine(project_dir)
+    stats = engine.get_collection_stats()
+
+    if stats["total_chunks"] == 0:
+        console.print("[yellow]⚠️ Codebase not indexed. Indexing now...[/yellow]")
+        engine.index()
+
+    results = engine.search(query, top_k=10)
+    engine.print_search_results(results)
+
+    # Offer to use results as context for Claude
+    if results and Confirm.ask("\nUse these results as context for Claude?", default=False):
+        context = engine.search_for_prompt(query)
+        instruction = Prompt.ask("What should Claude do with this code?")
+
+        full_prompt = f"""{context}
+
+## Your Task
+{instruction}
+
+Generate production-ready code. Use ===FILE: path=== and ===END FILE=== markers.
+"""
+        agent = ClaudeAgent()
+        files = agent.generate_code(full_prompt)
+
+        if files:
+            generator = CodeGenerator()
+            generator.preview_files(files)
+            if Confirm.ask("\nSave files?", default=True):
+                output_dir = Prompt.ask("Output directory", default=Config.OUTPUT_DIR)
+                generator = CodeGenerator(output_dir=output_dir)
+                generator.save_files(files)
+
+
+# ─────────────────────────────────────────────────
 # Quick Menu (no args)
 # ─────────────────────────────────────────────────
 
@@ -503,14 +631,19 @@ def show_quick_menu():
         "2": ("🔍 Review code", "review"),
         "3": ("🧪 Generate unit tests", "test"),
         "4": ("🎭 Generate Playwright E2E tests", "e2e"),
-        "5": ("🐛 Fix a bug", "fix"),
-        "6": ("📋 Fetch Jira ticket only", "jira"),
-        "7": ("🎨 Fetch Figma design only", "figma"),
-        "8": ("🔌 Parse API docs only", "api"),
+        "5": ("� Self-healing loop (run tests → auto-fix)", "heal"),
+        "6": ("⚙️ Generate CI/CD workflows (GitHub Actions)", "ci"),
+        "7": ("📚 Index codebase for RAG search", "index"),
+        "8": ("🔍 Search codebase (RAG)", "search"),
+        "9": ("🐛 Fix a bug", "fix"),
+        "10": ("💰 Show session costs", "costs"),
+        "11": ("📋 Fetch Jira ticket only", "jira"),
+        "12": ("🎨 Fetch Figma design only", "figma"),
+        "13": ("🔌 Parse API docs only", "api"),
     }
 
     for key, (label, _) in options.items():
-        console.print(f"  [bold]{key}[/bold]. {label}")
+        console.print(f"  [bold]{key:>2}[/bold]. {label}")
 
     choice = Prompt.ask("\nChoice", choices=list(options.keys()), default="1")
     _, mode = options[choice]
@@ -527,9 +660,25 @@ def show_quick_menu():
         source = Prompt.ask("File or folder to generate E2E tests for")
         base_url = Prompt.ask("Base URL", default="http://localhost:3000")
         run_playwright_e2e_generation(source, base_url)
+    elif mode == "heal":
+        project = Prompt.ask("Project directory", default=".")
+        framework = Prompt.ask("Test framework", default="jest")
+        run_heal_mode(project, framework)
+    elif mode == "ci":
+        project = Prompt.ask("Project directory", default=".")
+        run_ci_mode(project)
+    elif mode == "index":
+        project = Prompt.ask("Project directory to index")
+        run_rag_index(project)
+    elif mode == "search":
+        project = Prompt.ask("Indexed project directory")
+        query = Prompt.ask("Search query")
+        run_rag_search(project, query)
     elif mode == "fix":
         error = Prompt.ask("Paste error message or file path")
         run_bug_fix(error)
+    elif mode == "costs":
+        TokenTracker.instance().print_session_summary()
     elif mode == "jira":
         key = Prompt.ask("Jira ticket key (e.g., PROJ-123)")
         if Config.has_jira():
