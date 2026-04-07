@@ -40,6 +40,9 @@ from agent.self_healer import SelfHealer, run_self_healing
 from agent.ci_generator import CIGenerator, run_ci_generation
 from agent.token_tracker import TokenTracker
 from agent.rag_engine import RAGEngine, index_codebase, search_codebase
+from agent.frontend_agent import run_a11y_heal, run_component_generate, run_style_refactor
+from agent.amplitude_agent import run_amplitude_agent
+from agent.i18n_agent import run_i18n_agent, SUPPORTED_LOCALES
 from templates.prompt_template import (
     build_full_feature_prompt,
     build_code_review_prompt,
@@ -92,8 +95,24 @@ BANNER = """
 @click.option("--index", "index_path", help="Index a codebase for RAG search")
 @click.option("--search", "search_query", help="Search indexed codebase (use with --index)")
 @click.option("--costs", is_flag=True, help="Show session cost summary")
+# ── Frontend Agent flags ───────────────────────────────────────────────────
+@click.option("--heal-a11y", "heal_a11y", help="Auto-fix WCAG 2.1 AA issues (path to project or file)")
+@click.option("--a11y-file", "a11y_file", help="Target a single file for a11y healing (use with --heal-a11y)")
+@click.option("--a11y-dry-run", "a11y_dry_run", is_flag=True, help="Preview a11y fixes without writing to disk")
+@click.option("--new-component", "new_component", help="Generate a full component matrix (name, e.g. PricingTable)")
+@click.option("--component-desc", "component_desc", help="Description for --new-component")
+@click.option("--component-type", "component_type", default="molecule", help="atom | molecule | organism | page")
+@click.option("--style-lib", "style_lib", default="styled-components", help="styled-components | antd")
+@click.option("--refactor-styles", "refactor_styles", help="Migrate inline styles to styled-components/antd (path to project or file)")
+@click.option("--refactor-target", "refactor_target", default="styled-components", help="Target library: styled-components | antd")
+@click.option("--add-analytics", "add_analytics", help="Generate Amplitude integration (path to project)")
+@click.option("--app-name", "app_name", default="My App", help="App name used in generated analytics (use with --add-analytics)")
+@click.option("--env-prefix", "env_prefix", default="NEXT_PUBLIC", help="Env-var prefix: NEXT_PUBLIC | VITE")
+@click.option("--add-i18n", "add_i18n", help="Generate i18n/translations integration (path to project)")
+@click.option("--locales", "locales", default="en,es,fr,de", help="Comma-separated locale codes e.g. en,es,fr,de,ja")
+@click.option("--i18n-ns", "i18n_ns", default="translation", help="i18next namespace (default: translation)")
 @click.pass_context
-def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url, heal, heal_framework, heal_retries, generate_ci, index_path, search_query, costs):
+def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url, heal, heal_framework, heal_retries, generate_ci, index_path, search_query, costs, heal_a11y, a11y_file, a11y_dry_run, new_component, component_desc, component_type, style_lib, refactor_styles, refactor_target, add_analytics, app_name, env_prefix, add_i18n, locales, i18n_ns):
     """🤖 Claude AI Agent — Generate production code from Jira + Figma + API Docs."""
     console.print(BANNER)
 
@@ -131,6 +150,17 @@ def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test
         run_rag_search(index_path, search_query)
     elif index_path:
         run_rag_index(index_path)
+    # ── Frontend Agent routes ──────────────────────────────────────────────
+    elif heal_a11y:
+        run_a11y_heal_mode(heal_a11y, a11y_file, a11y_dry_run)
+    elif new_component:
+        run_new_component_mode(new_component, component_desc, component_type, style_lib, output)
+    elif refactor_styles:
+        run_refactor_styles_mode(refactor_styles, refactor_target, output)
+    elif add_analytics:
+        run_add_analytics_mode(add_analytics, app_name, env_prefix, output)
+    elif add_i18n:
+        run_add_i18n_mode(add_i18n, locales, i18n_ns, output)
     elif jira or figma or swagger:
         run_full_workflow(jira, figma, swagger, output, api_filter, stack, include_tests=not no_tests)
     else:
@@ -619,6 +649,161 @@ Generate production-ready code. Use ===FILE: path=== and ===END FILE=== markers.
 
 
 # ─────────────────────────────────────────────────
+# ♿️  A11y Heal Mode
+# ─────────────────────────────────────────────────
+
+def run_a11y_heal_mode(
+    project_dir: str,
+    target_file: str | None = None,
+    dry_run: bool = False,
+):
+    """Scan + auto-fix WCAG 2.1 AA accessibility violations."""
+    console.print(Panel(
+        f"[bold]♿️  A11y Healer[/bold]\n"
+        f"Project : {project_dir}\n"
+        f"Mode    : {'DRY RUN' if dry_run else 'AUTO-FIX'}",
+        style="cyan",
+    ))
+    if not target_file:
+        target_file = Prompt.ask(
+            "  Target a specific file? (or press Enter to scan whole project)",
+            default="",
+        ) or None
+    run_a11y_heal(project_dir, target_file=target_file, dry_run=dry_run)
+
+
+# ─────────────────────────────────────────────────
+# 🧩  Component Matrix Generator Mode
+# ─────────────────────────────────────────────────
+
+def run_new_component_mode(
+    component_name: str,
+    description: str | None,
+    component_type: str = "molecule",
+    style_lib: str = "styled-components",
+    output_dir: str | None = None,
+):
+    """Generate a full component matrix: TSX + Tests + Types + Barrel."""
+    console.print(Panel(
+        f"[bold]🧩 Component Matrix Generator[/bold]\n"
+        f"Component : {component_name}  |  Type: {component_type}  |  Style: {style_lib}",
+        style="cyan",
+    ))
+
+    if not description:
+        description = Prompt.ask(f"  Describe the {component_name} component")
+
+    props_hint = Prompt.ask("  Any specific props / variants? (or press Enter to skip)", default="")
+    out = output_dir or Prompt.ask("  Output directory", default=".")
+
+    run_component_generate(
+        component_name=component_name,
+        description=description,
+        style_lib=style_lib,
+        component_type=component_type,
+        output_dir=out,
+        props_hint=props_hint,
+    )
+
+
+# ─────────────────────────────────────────────────
+# 🧹  Style Refactor Mode
+# ─────────────────────────────────────────────────
+
+def run_refactor_styles_mode(
+    project_dir: str,
+    target_lib: str = "styled-components",
+    output_dir: str | None = None,
+):
+    """Migrate inline styles to styled-components or Ant Design 6."""
+    console.print(Panel(
+        f"[bold]🧹 Style Refactor Agent[/bold]\n"
+        f"Project : {project_dir}  |  Target: {target_lib}",
+        style="cyan",
+    ))
+    single_file = Prompt.ask(
+        "  Target a specific file? (or press Enter to scan whole project)",
+        default="",
+    ) or None
+    run_style_refactor(project_dir, target=target_lib, file=single_file, output_dir=output_dir)
+
+
+# ─────────────────────────────────────────────────
+# 📊  Amplitude Analytics Mode
+# ─────────────────────────────────────────────────
+
+def run_add_analytics_mode(
+    project_dir: str,
+    app_name: str = "My App",
+    env_prefix: str = "NEXT_PUBLIC",
+    output_dir: str | None = None,
+):
+    """Scan project and generate a full typed Amplitude analytics integration."""
+    console.print(Panel(
+        f"[bold]📊 Amplitude Analytics Agent[/bold]\n"
+        f"Project : {project_dir}",
+        style="cyan",
+    ))
+
+    if app_name == "My App":
+        app_name = Prompt.ask("  App name", default="My App")
+    env_prefix = Prompt.ask(
+        "  Env prefix (NEXT_PUBLIC for Next.js, VITE for Vite)",
+        default=env_prefix,
+    )
+    analytics_dir = Prompt.ask("  Analytics output directory", default="src/analytics")
+    out = output_dir or Prompt.ask("  Root output directory", default=".")
+
+    run_amplitude_agent(
+        project_dir=project_dir,
+        app_name=app_name,
+        output_dir=out,
+        analytics_dir=analytics_dir,
+        env_prefix=env_prefix,
+    )
+
+
+# ─────────────────────────────────────────────────
+# 🌍  i18n / Translations Mode
+# ─────────────────────────────────────────────────
+
+def run_add_i18n_mode(
+    project_dir: str,
+    locales_str: str = "en,es,fr,de",
+    namespace: str = "translation",
+    output_dir: str | None = None,
+):
+    """Extract strings and generate a full react-i18next multilingual integration."""
+    console.print(Panel(
+        f"[bold]🌍 i18n / Translations Agent[/bold]\n"
+        f"Project : {project_dir}",
+        style="cyan",
+    ))
+
+    # Show supported locales as a hint
+    locale_hint = "  Available: " + ", ".join(
+        f"{code} ({info['name']})" for code, info in list(SUPPORTED_LOCALES.items())
+    )
+    console.print(f"[dim]{locale_hint}[/dim]")
+
+    locales_input = Prompt.ask(
+        "  Comma-separated locale codes",
+        default=locales_str,
+    )
+    locales = [lc.strip() for lc in locales_input.split(",") if lc.strip()]
+
+    ns = Prompt.ask("  i18next namespace", default=namespace)
+    out = output_dir or Prompt.ask("  Root output directory", default=".")
+
+    run_i18n_agent(
+        project_dir=project_dir,
+        locales=locales,
+        output_dir=out,
+        namespace=ns,
+    )
+
+
+# ─────────────────────────────────────────────────
 # Quick Menu (no args)
 # ─────────────────────────────────────────────────
 
@@ -627,19 +812,25 @@ def show_quick_menu():
     console.print(Panel("[bold]What would you like to do?[/bold]", style="cyan"))
 
     options = {
-        "1": ("🚀 Generate feature (Jira + Figma + API → Code + Tests)", "interactive"),
-        "2": ("🔍 Review code", "review"),
-        "3": ("🧪 Generate unit tests", "test"),
-        "4": ("🎭 Generate Playwright E2E tests", "e2e"),
-        "5": ("� Self-healing loop (run tests → auto-fix)", "heal"),
-        "6": ("⚙️ Generate CI/CD workflows (GitHub Actions)", "ci"),
-        "7": ("📚 Index codebase for RAG search", "index"),
-        "8": ("🔍 Search codebase (RAG)", "search"),
-        "9": ("🐛 Fix a bug", "fix"),
-        "10": ("💰 Show session costs", "costs"),
-        "11": ("📋 Fetch Jira ticket only", "jira"),
-        "12": ("🎨 Fetch Figma design only", "figma"),
-        "13": ("🔌 Parse API docs only", "api"),
+        "1":  ("\U0001f680 Generate feature (Jira + Figma + API \u2192 Code + Tests)", "interactive"),
+        "2":  ("\U0001f50d Review code",                                           "review"),
+        "3":  ("\U0001f9ea Generate unit tests",                                   "test"),
+        "4":  ("\U0001f3ad Generate Playwright E2E tests",                         "e2e"),
+        "5":  ("\U0001f504 Self-healing loop (run tests \u2192 auto-fix)",              "heal"),
+        "6":  ("\u2699\ufe0f  Generate CI/CD workflows (GitHub Actions)",            "ci"),
+        "7":  ("\U0001f4da Index codebase for RAG search",                         "index"),
+        "8":  ("\U0001f50d Search codebase (RAG)",                                 "search"),
+        "9":  ("\U0001f41b Fix a bug",                                             "fix"),
+        "10": ("\U0001f4b0 Show session costs",                                     "costs"),
+        "11": ("\U0001f4cb Fetch Jira ticket only",                                "jira"),
+        "12": ("\U0001f3a8 Fetch Figma design only",                               "figma"),
+        "13": ("\U0001f50c Parse API docs only",                                   "api"),
+        # ── Frontend Agent ───────────────────────────────────────────────────
+        "14": ("\u267f\ufe0f  A11y Healer \u2014 auto-fix WCAG 2.1 AA violations",        "a11y"),
+        "15": ("\U0001f9e9 New component (Styled-Components / AntD 6)",            "component"),
+        "16": ("\U0001f9f9 Refactor inline styles \u2192 Styled-Components / AntD 6",  "refactor"),
+        "17": ("\U0001f4ca Generate Amplitude analytics integration",              "analytics"),
+        "18": ("\U0001f30d Generate i18n / Translations (react-i18next)",          "i18n"),
     }
 
     for key, (label, _) in options.items():
@@ -701,6 +892,28 @@ def show_quick_menu():
         parser = ApiDocsParser()
         api_docs = parser.parse(source)
         console.print(api_docs.to_prompt_context())
+    # ── Frontend Agent menu handlers ────────────────────────────────────────
+    elif mode == "a11y":
+        project = Prompt.ask("Project directory (or path to a single file)", default=".")
+        dry = Confirm.ask("Dry run (preview only)?", default=False)
+        run_a11y_heal_mode(project, dry_run=dry)
+    elif mode == "component":
+        name = Prompt.ask("Component name (PascalCase, e.g. PricingTable)")
+        desc = Prompt.ask("Describe the component")
+        ctype = Prompt.ask("Type", choices=["atom", "molecule", "organism", "page"], default="molecule")
+        lib = Prompt.ask("Style library", choices=["styled-components", "antd"], default="styled-components")
+        out = Prompt.ask("Output directory", default=".")
+        run_new_component_mode(name, desc, component_type=ctype, style_lib=lib, output_dir=out)
+    elif mode == "refactor":
+        project = Prompt.ask("Project directory (or single file)", default=".")
+        lib = Prompt.ask("Target library", choices=["styled-components", "antd"], default="styled-components")
+        run_refactor_styles_mode(project, target_lib=lib)
+    elif mode == "analytics":
+        project = Prompt.ask("Project directory", default=".")
+        run_add_analytics_mode(project)
+    elif mode == "i18n":
+        project = Prompt.ask("Project directory", default=".")
+        run_add_i18n_mode(project)
 
 
 # ─────────────────────────────────────────────────
