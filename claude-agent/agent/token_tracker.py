@@ -7,9 +7,8 @@ Tracks:
   - Cumulative session statistics
   - Rich formatted cost reports
 
-Pricing (Claude claude-sonnet-4-20250514 as of 2024):
-  - Input:  $3.00 per million tokens
-  - Output: $15.00 per million tokens
+Supports all major providers: Anthropic, OpenAI, Google Gemini, xAI Grok
+Pricing as of April 2026 — marked (est.) where officially unconfirmed.
 """
 
 import time
@@ -28,13 +27,60 @@ console = Console()
 # Pricing Data
 # ─────────────────────────────────────────────────
 
-# Prices per MILLION tokens (USD)
-MODEL_PRICING = {
-    "claude-sonnet-4-20250514": {"input": 3.00, "output": 15.00},
-    "claude-sonnet-4-20250514": {"input": 3.00, "output": 15.00},
-    "claude-opus-4-20250514": {"input": 15.00, "output": 75.00},
-    "claude-3-haiku-20240307": {"input": 0.25, "output": 1.25},
-    # Add more models as needed
+# Prices per MILLION tokens (USD) — input / output
+# Sources: official pricing pages. Marked (est.) where not officially published.
+MODEL_PRICING: dict[str, dict[str, float]] = {
+
+    # ── Anthropic Claude ─────────────────────────────────────────────────────
+    # Haiku (fastest / cheapest)
+    "claude-3-haiku-20240307":          {"input": 0.25,  "output": 1.25},
+    "claude-haiku-4-5":                 {"input": 0.80,  "output": 4.00},
+    "claude-haiku-4-5-20250514":        {"input": 0.80,  "output": 4.00},
+
+    # Sonnet (balanced)
+    "claude-sonnet-4-20250514":         {"input": 3.00,  "output": 15.00},
+    "claude-sonnet-4-5":                {"input": 3.00,  "output": 15.00},
+    "claude-sonnet-4-5-20250514":       {"input": 3.00,  "output": 15.00},
+    "claude-sonnet-4-6":                {"input": 3.00,  "output": 15.00},
+    "claude-sonnet-4-6-20250514":       {"input": 3.00,  "output": 15.00},
+
+    # Opus (most capable / most expensive)
+    "claude-opus-4-20250514":           {"input": 15.00, "output": 75.00},
+    "claude-opus-4-5":                  {"input": 15.00, "output": 75.00},
+    "claude-opus-4-5-20250514":         {"input": 15.00, "output": 75.00},
+    "claude-opus-4-6":                  {"input": 15.00, "output": 75.00},
+    "claude-opus-4-6-20250514":         {"input": 15.00, "output": 75.00},
+    "claude-opus-4-6-fast":             {"input": 15.00, "output": 75.00},  # fast mode (est.)
+
+    # ── OpenAI GPT ───────────────────────────────────────────────────────────
+    "gpt-4.1":                          {"input": 2.00,  "output": 8.00},
+    "gpt-4o":                           {"input": 2.50,  "output": 10.00},
+    "gpt-4o-mini":                      {"input": 0.15,  "output": 0.60},
+
+    # GPT-5 family
+    "gpt-5-mini":                       {"input": 1.10,  "output": 4.40},   # est.
+    "gpt-5.1":                          {"input": 2.50,  "output": 10.00},  # est.
+    "gpt-5.2":                          {"input": 2.50,  "output": 10.00},  # est.
+    "gpt-5.2-codex":                    {"input": 3.00,  "output": 15.00},  # est.
+    "gpt-5.3-codex":                    {"input": 3.00,  "output": 15.00},  # est.
+    "gpt-5.4":                          {"input": 5.00,  "output": 20.00},  # est.
+    "gpt-5.4-mini":                     {"input": 0.40,  "output": 1.60},   # est.
+
+    # ── Google Gemini ─────────────────────────────────────────────────────────
+    "gemini-2.5-pro":                   {"input": 1.25,  "output": 10.00},
+    "gemini-2.5-pro-preview":           {"input": 1.25,  "output": 10.00},
+    "gemini-3-flash":                   {"input": 0.075, "output": 0.30},   # est.
+    "gemini-3-flash-preview":           {"input": 0.075, "output": 0.30},   # est.
+    "gemini-3.1-pro":                   {"input": 1.25,  "output": 10.00},  # est.
+    "gemini-3.1-pro-preview":           {"input": 1.25,  "output": 10.00},  # est.
+
+    # ── xAI Grok ─────────────────────────────────────────────────────────────
+    "grok-code-fast-1":                 {"input": 1.00,  "output": 5.00},   # est.
+    "grok-3":                           {"input": 3.00,  "output": 15.00},  # est.
+    "grok-3-mini":                      {"input": 0.30,  "output": 0.50},   # est.
+
+    # ── Microsoft / Other ────────────────────────────────────────────────────
+    "raptor-mini":                      {"input": 0.10,  "output": 0.40},   # est.
 }
 
 
@@ -263,12 +309,13 @@ class TokenTracker:
                 pct = (cost / self.stats.total_cost_usd) * 100
                 console.print(f"  {mode:<20} {bar} ${cost:.4f} ({pct:.0f}%)")
 
-    def estimate_cost(self, prompt: str, model: str = "claude-sonnet-4-20250514") -> str:
+    def estimate_cost(self, prompt: str, model: str = "claude-sonnet-4-6-20250514") -> str:
         """
         Estimate the cost of a prompt before sending it.
 
         Uses a rough approximation: ~4 chars per token for English.
         Output is estimated at 2x the input tokens (conservative).
+        Falls back to Claude Sonnet 4.6 pricing for unknown models.
         """
         # Rough token estimate: ~4 characters per token
         estimated_input_tokens = len(prompt) // 4
