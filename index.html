@@ -1,673 +1,1037 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-Powered Development Toolkit</title>
-    <meta name="description" content="Complete toolkit for teams to use AI across the entire software development lifecycle — from Jira ticket to production code.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0a0a0f;
-            --bg-card: #12121a;
-            --bg-card-hover: #1a1a2e;
-            --border: #2a2a3e;
-            --text: #e4e4e7;
-            --text-muted: #a1a1aa;
-            --accent: #818cf8;
-            --accent-glow: rgba(129, 140, 248, 0.15);
-            --green: #34d399;
-            --yellow: #fbbf24;
-            --pink: #f472b6;
-            --blue: #60a5fa;
-            --orange: #fb923c;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* Animated background gradient */
-        .bg-gradient {
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 30%, rgba(129,140,248,0.05) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 70%, rgba(244,114,182,0.05) 0%, transparent 50%);
-            animation: bgShift 20s ease-in-out infinite alternate;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        @keyframes bgShift {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-5%, -5%); }
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Nav */
-        nav {
-            padding: 20px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logo-icon { font-size: 1.5rem; }
-
-        .nav-links { display: flex; gap: 24px; }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover { color: var(--accent); }
-
-        /* Hero */
-        .hero {
-            text-align: center;
-            padding: 80px 0 60px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 6px 16px;
-            background: var(--accent-glow);
-            border: 1px solid rgba(129,140,248,0.3);
-            border-radius: 100px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--accent);
-            margin-bottom: 24px;
-        }
-
-        h1 {
-            font-size: clamp(2.5rem, 5vw, 3.8rem);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #fff 0%, #818cf8 50%, #f472b6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            font-size: 1.15rem;
-            color: var(--text-muted);
-            max-width: 640px;
-            margin: 0 auto 36px;
-        }
-
-        .cta-group {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: #6366f1;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(129,140,248,0.3);
-        }
-
-        .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        /* Flow diagram */
-        .flow {
-            padding: 40px 0 60px;
-        }
-
-        .flow-diagram {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            padding: 32px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-        }
-
-        .flow-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            padding: 16px 20px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            min-width: 100px;
-            transition: all 0.2s;
-        }
-
-        .flow-item:hover {
-            border-color: var(--accent);
-            box-shadow: 0 0 20px var(--accent-glow);
-        }
-
-        .flow-icon { font-size: 1.8rem; }
-        .flow-label { font-size: 0.85rem; font-weight: 600; }
-
-        .flow-arrow {
-            font-size: 1.5rem;
-            color: var(--accent);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
-        }
-
-        /* Section titles */
-        .section-title {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .section-title h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .section-title p {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-        }
-
-        /* Cards grid */
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 0 0 80px;
-        }
-
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px;
-            transition: all 0.3s;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .card:hover {
-            border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 20px var(--accent-glow);
-        }
-
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 16px;
-            display: inline-block;
-        }
-
-        .card h3 {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .card p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        .card-tag {
-            display: inline-block;
-            margin-top: 16px;
-            padding: 4px 12px;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .tag-guide { background: rgba(52,211,153,0.15); color: var(--green); }
-        .tag-tool { background: rgba(129,140,248,0.15); color: var(--accent); }
-        .tag-python { background: rgba(251,191,36,0.15); color: var(--yellow); }
-
-        /* Features */
-        .features {
-            padding: 80px 0;
-        }
-
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px;
-        }
-
-        .feature {
-            text-align: center;
-            padding: 32px 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            transition: border-color 0.2s;
-        }
-
-        .feature:hover { border-color: var(--accent); }
-
-        .feature-icon { font-size: 2.5rem; margin-bottom: 16px; }
-        .feature h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
-        .feature p { color: var(--text-muted); font-size: 0.85rem; }
-
-        /* CLI Section */
-        .cli-section {
-            padding: 60px 0 80px;
-        }
-
-        .cli-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        .cli-header {
-            padding: 12px 20px;
-            background: rgba(255,255,255,0.03);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .cli-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .cli-dot.red { background: #ff5f57; }
-        .cli-dot.yellow { background: #febc2e; }
-        .cli-dot.green { background: #28c840; }
-
-        .cli-title {
-            margin-left: 8px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .cli-body {
-            padding: 24px;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.9rem;
-            line-height: 1.8;
-            overflow-x: auto;
-        }
-
-        .cli-comment { color: #6b7280; }
-        .cli-cmd { color: var(--green); }
-        .cli-flag { color: var(--accent); }
-        .cli-string { color: var(--yellow); }
-
-        /* Time savings */
-        .savings {
-            padding: 80px 0;
-        }
-
-        .savings-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        .savings-table th, .savings-table td {
-            padding: 16px 24px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .savings-table th {
-            background: rgba(255,255,255,0.03);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-        }
-
-        .savings-table td {
-            font-size: 0.95rem;
-        }
-
-        .savings-table tr:last-child td { border-bottom: none; }
-        .savings-table tr:hover td { background: rgba(129,140,248,0.05); }
-
-        .time-manual { color: var(--text-muted); }
-        .time-ai { color: var(--green); font-weight: 700; }
-
-        /* Footer */
-        footer {
-            padding: 40px 0;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        footer a { color: var(--accent); text-decoration: none; }
-        footer a:hover { text-decoration: underline; }
-
-        /* Responsive */
-        @media (max-width: 640px) {
-            .nav-links { display: none; }
-            .hero { padding: 60px 0 40px; }
-            .flow-diagram { flex-direction: column; }
-            .flow-arrow { transform: rotate(90deg); }
-            .cta-group { flex-direction: column; align-items: center; }
-            .savings-table { font-size: 0.85rem; }
-            .savings-table th, .savings-table td { padding: 12px 16px; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude AI Dev Toolkit — Full Command Reference</title>
+  <meta name="description" content="Every agentic workflow available in the Claude AI Dev Toolkit — CLI flags, under-the-hood mechanics, and real-world use cases." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:          #080810;
+      --bg-nav:      rgba(8,8,16,0.85);
+      --bg-card:     #10101c;
+      --bg-code:     #0d0d1a;
+      --border:      #1e1e30;
+      --border-hi:   #2e2e4a;
+      --text:        #e2e2ee;
+      --muted:       #7070a0;
+      --accent:      #818cf8;
+      --accent-dim:  rgba(129,140,248,0.12);
+      --accent-glow: rgba(129,140,248,0.25);
+      --green:       #34d399;
+      --green-dim:   rgba(52,211,153,0.12);
+      --yellow:      #fbbf24;
+      --yellow-dim:  rgba(251,191,36,0.12);
+      --pink:        #f472b6;
+      --pink-dim:    rgba(244,114,182,0.12);
+      --blue:        #60a5fa;
+      --blue-dim:    rgba(96,165,250,0.12);
+      --orange:      #fb923c;
+      --orange-dim:  rgba(251,146,60,0.12);
+      --teal:        #2dd4bf;
+      --teal-dim:    rgba(45,212,191,0.12);
+      --purple:      #c084fc;
+      --purple-dim:  rgba(192,132,252,0.12);
+      --red:         #f87171;
+      --red-dim:     rgba(248,113,113,0.12);
+      --radius:      14px;
+      --mono:        'JetBrains Mono', 'Fira Code', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      overflow-x: hidden;
+      font-size: 15px;
+    }
+    .ambient {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 40% at 15% 20%, rgba(129,140,248,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 35% at 85% 75%, rgba(244,114,182,.06) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 30% at 50% 50%, rgba(52,211,153,.04) 0%, transparent 50%);
+    }
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg-nav);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+    }
+    .nav-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px; gap: 24px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--pink));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .logo-text { font-weight: 700; font-size: 1rem; color: var(--text); }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: .82rem;
+      font-weight: 500; padding: 5px 10px; border-radius: 8px; transition: all .15s;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--border); }
+    .nav-cta { background: var(--accent); color: #fff !important; padding: 7px 16px !important; border-radius: 8px !important; }
+    .nav-cta:hover { background: #6366f1 !important; color: #fff !important; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+    .hero { text-align: center; padding: 90px 32px 60px; position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 18px; border-radius: 100px;
+      background: var(--accent-dim); border: 1px solid rgba(129,140,248,.3);
+      font-size: .82rem; font-weight: 600; color: var(--accent);
+      margin-bottom: 28px; letter-spacing: .02em;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 900; line-height: 1.1; margin-bottom: 22px;
+      background: linear-gradient(140deg, #fff 0%, #818cf8 45%, #f472b6 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero p { font-size: 1.1rem; color: var(--muted); max-width: 660px; margin: 0 auto 36px; }
+    .btn-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 26px; border-radius: 12px; font-size: .95rem; font-weight: 600; text-decoration: none; transition: all .2s; border: none; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #6366f1; transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+    .btn-ghost { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; padding: 40px 0; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 20px; text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .stat-label { font-size: .8rem; color: var(--muted); margin-top: 4px; }
+    .section { padding: 64px 0 16px; }
+    .section-header { margin-bottom: 32px; }
+    .section-tag { display: inline-flex; align-items: center; gap: 6px; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    .section-header h2 { font-size: 1.9rem; font-weight: 800; margin-bottom: 8px; }
+    .section-header p { color: var(--muted); max-width: 600px; }
+    .cmd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(540px, 1fr)); gap: 20px; }
+    @media (max-width: 680px) { .cmd-grid { grid-template-columns: 1fr; } }
+    .cmd-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+    .cmd-card:hover { border-color: var(--border-hi); box-shadow: 0 4px 32px rgba(0,0,0,.4); }
+    .cmd-header { padding: 20px 22px 16px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; user-select: none; }
+    .cmd-icon { width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+    .cmd-meta { flex: 1; min-width: 0; }
+    .cmd-title { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .cmd-subtitle { font-size: .82rem; color: var(--muted); }
+    .cmd-chevron { color: var(--muted); font-size: 1rem; transition: transform .25s; margin-top: 4px; flex-shrink: 0; }
+    .cmd-card.open .cmd-chevron { transform: rotate(180deg); }
+    .cmd-flag { margin: 0 22px 16px; background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; font-family: var(--mono); font-size: .82rem; color: var(--accent); overflow-x: auto; white-space: nowrap; }
+    .cmd-flag .flag { color: var(--green); }
+    .cmd-flag .arg  { color: var(--accent); }
+    .cmd-flag .val  { color: var(--pink); }
+    .cmd-flag .cmt  { color: var(--muted); font-style: italic; }
+    .cmd-body { padding: 0 22px 22px; display: none; }
+    .cmd-card.open .cmd-body { display: block; }
+    .cmd-section-title { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 10px; }
+    .pipeline { display: flex; flex-direction: column; gap: 0; border-left: 2px solid var(--border); margin-left: 10px; }
+    .step { position: relative; padding: 8px 0 8px 24px; }
+    .step::before { content: ''; position: absolute; left: -5px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg-card); }
+    .step-num { font-size: .7rem; font-weight: 700; color: var(--accent); font-family: var(--mono); letter-spacing: .05em; }
+    .step-text { font-size: .88rem; color: var(--text); margin-top: 2px; }
+    .step-detail { font-size: .8rem; color: var(--muted); margin-top: 3px; }
+    .use-cases { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .uc { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 500; padding: 5px 12px; border-radius: 8px; background: var(--bg-code); border: 1px solid var(--border); color: var(--text); }
+    .uc-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .flags-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .flags-table th { text-align: left; padding: 8px 10px; color: var(--muted); font-weight: 600; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+    .flags-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .flags-table tr:last-child td { border-bottom: none; }
+    .flag-name { font-family: var(--mono); font-size: .78rem; color: var(--green); white-space: nowrap; }
+    .flag-desc { color: var(--muted); }
+    .flag-default { font-family: var(--mono); font-size: .75rem; color: var(--yellow); }
+    .outputs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .output-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-family: var(--mono); padding: 4px 10px; border-radius: 7px; background: var(--green-dim); border: 1px solid rgba(52,211,153,.25); color: var(--green); }
+    .ic-accent { background: var(--accent-dim); }
+    .ic-green  { background: var(--green-dim); }
+    .ic-yellow { background: var(--yellow-dim); }
+    .ic-pink   { background: var(--pink-dim); }
+    .ic-blue   { background: var(--blue-dim); }
+    .ic-orange { background: var(--orange-dim); }
+    .ic-teal   { background: var(--teal-dim); }
+    .ic-purple { background: var(--purple-dim); }
+    .ic-red    { background: var(--red-dim); }
+    .uc-accent { background: var(--accent); }
+    .uc-green  { background: var(--green); }
+    .uc-yellow { background: var(--yellow); }
+    .uc-pink   { background: var(--pink); }
+    .uc-blue   { background: var(--blue); }
+    .uc-orange { background: var(--orange); }
+    .uc-teal   { background: var(--teal); }
+    .uc-purple { background: var(--purple); }
+    .uc-red    { background: var(--red); }
+    .ref-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .ref-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    .ref-table th { text-align: left; padding: 12px 18px; background: var(--bg-code); color: var(--muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+    .ref-table td { padding: 11px 18px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .ref-table tr:last-child td { border-bottom: none; }
+    .ref-table tr:hover td { background: rgba(255,255,255,.02); }
+    .ref-cmd { font-family: var(--mono); font-size: .78rem; color: var(--green); }
+    .ref-desc { color: var(--muted); }
+    .ref-cat { display: inline-block; font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .06em; }
+    .install-block { background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .install-tab { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+    .install-tab button { background: none; border: none; padding: 10px 20px; font-size: .82rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: all .15s; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .install-tab button.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .install-code { padding: 20px; font-family: var(--mono); font-size: .83rem; color: var(--text); line-height: 1.9; display: none; }
+    .install-code.active { display: block; }
+    .install-code .kw  { color: var(--accent); }
+    .install-code .str { color: var(--green); }
+    .install-code .cmt { color: var(--muted); font-style: italic; }
+    .install-code .env { color: var(--yellow); }
+    footer { border-top: 1px solid var(--border); padding: 40px 32px; text-align: center; color: var(--muted); font-size: .85rem; position: relative; z-index: 1; }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .search-wrap { position: relative; max-width: 480px; margin: 0 auto 40px; }
+    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1rem; }
+    #search { width: 100%; padding: 12px 16px 12px 44px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; font-size: .95rem; color: var(--text); outline: none; transition: border-color .2s; font-family: inherit; }
+    #search:focus { border-color: var(--accent); }
+    #search::placeholder { color: var(--muted); }
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; justify-content: center; }
+    .filter-pill { padding: 6px 16px; border-radius: 100px; font-size: .8rem; font-weight: 600; border: 1px solid var(--border); background: var(--bg-card); color: var(--muted); cursor: pointer; transition: all .15s; }
+    .filter-pill:hover, .filter-pill.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .no-results { text-align: center; color: var(--muted); padding: 60px 0; display: none; grid-column: 1 / -1; }
+    @media (max-width: 900px) { .wrap { padding: 0 20px; } .nav-links { display: none; } .hero { padding: 60px 20px 40px; } }
+    @media (max-width: 600px) { .cmd-grid { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); } }
+  </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
+<div class="ambient"></div>
 
-    <div class="container">
-        <!-- Nav -->
-        <nav>
-            <div class="logo">
-                <span class="logo-icon">🤖</span>
-                <span>AI Dev Toolkit</span>
-            </div>
-            <div class="nav-links">
-                <a href="#guides">Guides</a>
-                <a href="#tool">Claude Agent</a>
-                <a href="#savings">Time Savings</a>
-                <a href="https://github.com/BaluRaut/ai-dev-toolkit" target="_blank">GitHub ↗</a>
-            </div>
-        </nav>
-
-        <!-- Hero -->
-        <section class="hero">
-            <div class="badge">✨ Open Source — Free for Teams</div>
-            <h1>AI-Powered<br>Development Toolkit</h1>
-            <p>
-                Complete guides + Python tools to use AI across your entire development 
-                workflow — from Jira ticket to production code. No manual coding needed.
-            </p>
-            <div class="cta-group">
-                <a href="https://github.com/BaluRaut/ai-dev-toolkit" class="btn btn-primary" target="_blank">
-                    ⭐ Star on GitHub
-                </a>
-                <a href="https://github.com/BaluRaut/ai-dev-toolkit#-quick-start" class="btn btn-secondary" target="_blank">
-                    🚀 Quick Start
-                </a>
-            </div>
-        </section>
-
-        <!-- Flow Diagram -->
-        <section class="flow">
-            <div class="flow-diagram">
-                <div class="flow-item">
-                    <span class="flow-icon">📋</span>
-                    <span class="flow-label">Jira Ticket</span>
-                </div>
-                <span class="flow-arrow">→</span>
-                <div class="flow-item">
-                    <span class="flow-icon">🎨</span>
-                    <span class="flow-label">Figma Design</span>
-                </div>
-                <span class="flow-arrow">→</span>
-                <div class="flow-item">
-                    <span class="flow-icon">🔌</span>
-                    <span class="flow-label">API Docs</span>
-                </div>
-                <span class="flow-arrow">→</span>
-                <div class="flow-item" style="border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow);">
-                    <span class="flow-icon">🤖</span>
-                    <span class="flow-label">Claude Agent</span>
-                </div>
-                <span class="flow-arrow">→</span>
-                <div class="flow-item">
-                    <span class="flow-icon">✅</span>
-                    <span class="flow-label">Working Code</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Guides -->
-        <section id="guides">
-            <div class="section-title">
-                <h2>📚 Guides & Playbooks</h2>
-                <p>Everything your team needs to go AI-first</p>
-            </div>
-            <div class="cards">
-                <a href="https://github.com/BaluRaut/ai-dev-toolkit/blob/main/AI_WORKFLOW_PLAYBOOK.md" class="card" target="_blank">
-                    <span class="card-icon">📋</span>
-                    <h3>AI Workflow Playbook</h3>
-                    <p>Complete guide to using AI across Jira → Figma → API Docs → Code → Tests. Includes team training plan.</p>
-                    <span class="card-tag tag-guide">Guide</span>
-                </a>
-                <a href="https://github.com/BaluRaut/ai-dev-toolkit/blob/main/AI_AGENTS_GUIDE.md" class="card" target="_blank">
-                    <span class="card-icon">🤖</span>
-                    <h3>AI Agents Comparison</h3>
-                    <p>Compare all AI agents: GitHub Copilot, Cursor, Devin, Claude, v0.dev, Bolt.new, and more.</p>
-                    <span class="card-tag tag-guide">Guide</span>
-                </a>
-                <a href="https://github.com/BaluRaut/ai-dev-toolkit/blob/main/AGENTIC_AI_GUIDE.md" class="card" target="_blank">
-                    <span class="card-icon">🧠</span>
-                    <h3>Agentic AI Deep Dive</h3>
-                    <p>What is agentic AI? How does it work? Where to use it? Time savings comparison.</p>
-                    <span class="card-tag tag-guide">Guide</span>
-                </a>
-                <a href="https://github.com/BaluRaut/ai-dev-toolkit/blob/main/CONNECT_FIGMA_JIRA_API_TO_AI.md" class="card" target="_blank">
-                    <span class="card-icon">🔗</span>
-                    <h3>Connect Figma + Jira + API</h3>
-                    <p>Practical step-by-step guide to feed Figma screenshots, Jira tickets, and API docs into AI.</p>
-                    <span class="card-tag tag-tool">Practical</span>
-                </a>
-            </div>
-        </section>
-
-        <!-- Claude Agent Tool -->
-        <section id="tool" class="features">
-            <div class="section-title">
-                <h2>🐍 Claude Agent — Python Tool</h2>
-                <p>Auto-fetch from Jira, Figma, Swagger → Generate code with Claude</p>
-            </div>
-            <div class="feature-grid">
-                <div class="feature">
-                    <div class="feature-icon">📋</div>
-                    <h3>Jira Connector</h3>
-                    <p>Auto-fetch ticket details, ACs, comments via REST API</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🎨</div>
-                    <h3>Figma Connector</h3>
-                    <p>Fetch design data, components, colors, fonts + screenshots</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🔌</div>
-                    <h3>Swagger Parser</h3>
-                    <p>Parse OpenAPI 2.0/3.0 specs from URLs or local files</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🤖</div>
-                    <h3>Claude Agent</h3>
-                    <p>Streams to Claude API, parses generated code into files</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">💾</div>
-                    <h3>Code Generator</h3>
-                    <p>Auto-saves generated code to your project structure</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🧪</div>
-                    <h3>5 Modes</h3>
-                    <p>Feature gen, interactive, code review, tests, bug fix</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- CLI Demo -->
-        <section class="cli-section">
-            <div class="section-title">
-                <h2>⚡ Usage</h2>
-                <p>One command to generate entire features</p>
-            </div>
-            <div class="cli-box">
-                <div class="cli-header">
-                    <span class="cli-dot red"></span>
-                    <span class="cli-dot yellow"></span>
-                    <span class="cli-dot green"></span>
-                    <span class="cli-title">Terminal — zsh</span>
-                </div>
-                <div class="cli-body">
-                    <span class="cli-comment"># Full workflow: Jira + Figma + API → Code</span><br>
-                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--jira</span> <span class="cli-string">PROJ-123</span> <span class="cli-flag">--figma</span> <span class="cli-string">"https://figma.com/file/..."</span> <span class="cli-flag">--swagger</span> <span class="cli-string">"https://api.com/swagger.json"</span>
-                    <br><br>
-                    <span class="cli-comment"># Interactive mode — paste context step by step</span><br>
-                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--interactive</span>
-                    <br><br>
-                    <span class="cli-comment"># Code review</span><br>
-                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--review</span> <span class="cli-string">src/components/Profile.tsx</span>
-                    <br><br>
-                    <span class="cli-comment"># Generate tests</span><br>
-                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--test</span> <span class="cli-string">src/services/userService.ts</span>
-                    <br><br>
-                    <span class="cli-comment"># Fix a bug</span><br>
-                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--fix</span> <span class="cli-string">"TypeError: Cannot read property 'map' of undefined"</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Time Savings -->
-        <section id="savings" class="savings">
-            <div class="section-title">
-                <h2>⏱️ Time Savings</h2>
-                <p>What used to take days now takes minutes</p>
-            </div>
-            <table class="savings-table">
-                <thead>
-                    <tr>
-                        <th>Task</th>
-                        <th>Manual</th>
-                        <th>With AI Agent</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>📋 Jira Epic → Stories</td>
-                        <td class="time-manual">3 hours</td>
-                        <td class="time-ai">5 min</td>
-                    </tr>
-                    <tr>
-                        <td>🎨 Figma → React Component</td>
-                        <td class="time-manual">6 hours</td>
-                        <td class="time-ai">20 min</td>
-                    </tr>
-                    <tr>
-                        <td>🔌 API Integration</td>
-                        <td class="time-manual">1 day</td>
-                        <td class="time-ai">30 min</td>
-                    </tr>
-                    <tr>
-                        <td>🚀 Full CRUD Feature</td>
-                        <td class="time-manual">3 days</td>
-                        <td class="time-ai">2-3 hours</td>
-                    </tr>
-                    <tr>
-                        <td>🧪 Test Suite</td>
-                        <td class="time-manual">1 day</td>
-                        <td class="time-ai">30 min</td>
-                    </tr>
-                    <tr>
-                        <td>🐛 Bug Investigation + Fix</td>
-                        <td class="time-manual">2 hours</td>
-                        <td class="time-ai">10 min</td>
-                    </tr>
-                    <tr>
-                        <td><strong>📦 Typical Full Feature</strong></td>
-                        <td class="time-manual"><strong>~1 week</strong></td>
-                        <td class="time-ai"><strong>~4-6 hours</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Footer -->
-        <footer>
-            <p>
-                Built with AI, for teams using AI 🤖 &nbsp;|&nbsp;
-                <a href="https://github.com/BaluRaut/ai-dev-toolkit">GitHub</a> &nbsp;|&nbsp;
-                MIT License &nbsp;|&nbsp;
-                Made by <a href="https://github.com/BaluRaut">Balasaheb Raut</a>
-            </p>
-        </footer>
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">&#129302;</div>
+      <span class="logo-text">Claude AI Dev Toolkit</span>
+    </a>
+    <div class="nav-links">
+      <a href="#workflows">Workflows</a>
+      <a href="#quick-ref">Quick Ref</a>
+      <a href="https://github.com/BaluRaut/ai-dev-toolkit" target="_blank" class="nav-cta">GitHub &#8594;</a>
     </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">&#128640; 18 Agentic Workflows &middot; Full Command Reference</div>
+  <h1>Build Faster With<br>AI-Powered Agents</h1>
+  <p>Every command, every flag, exactly what happens under the hood &mdash; and the real-world use case it solves. From a Jira ticket to production-ready code in one shot.</p>
+  <div class="btn-row">
+    <a href="https://github.com/BaluRaut/ai-dev-toolkit" class="btn btn-primary" target="_blank">&#11088; Star on GitHub</a>
+    <a href="#quick-ref" class="btn btn-ghost">&#128214; Quick Reference</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">18</div><div class="stat-label">CLI Workflows</div></div>
+    <div class="stat-card"><div class="stat-num">30+</div><div class="stat-label">AI Models Supported</div></div>
+    <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">Languages (i18n)</div></div>
+    <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">Test Frameworks</div></div>
+    <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Frontend Agents</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">CI/CD Templates</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag">&#9889; Get Started</div>
+      <h2>Install &amp; Configure</h2>
+      <p>Clone, configure your API keys, and run your first workflow in under 2 minutes.</p>
+    </div>
+    <div class="install-block">
+      <div class="install-tab">
+        <button class="active" onclick="switchTab(this,'tab-install')">Setup</button>
+        <button onclick="switchTab(this,'tab-env')">Environment</button>
+        <button onclick="switchTab(this,'tab-run')">First Run</button>
+      </div>
+      <div class="install-code active" id="tab-install">
+        <span class="cmt"># 1. Clone the repository</span><br>
+        git clone https://github.com/BaluRaut/ai-dev-toolkit.git<br>
+        cd ai-dev-toolkit/claude-agent<br><br>
+        <span class="cmt"># 2. Create virtual environment &amp; install deps</span><br>
+        python3 -m venv .venv &amp;&amp; source .venv/bin/activate<br>
+        pip install -r requirements.txt<br><br>
+        <span class="cmt"># 3. Copy env template</span><br>
+        cp .env.example .env
+      </div>
+      <div class="install-code" id="tab-env">
+        <span class="cmt"># Required</span><br>
+        <span class="env">ANTHROPIC_API_KEY</span>=sk-ant-...<br><br>
+        <span class="cmt"># Optional integrations</span><br>
+        <span class="env">JIRA_BASE_URL</span>=https://yourorg.atlassian.net<br>
+        <span class="env">JIRA_EMAIL</span>=you@company.com<br>
+        <span class="env">JIRA_API_TOKEN</span>=&lt;atlassian-token&gt;<br><br>
+        <span class="env">FIGMA_ACCESS_TOKEN</span>=figd_...<br><br>
+        <span class="cmt"># Analytics (optional)</span><br>
+        <span class="env">NEXT_PUBLIC_AMPLITUDE_API_KEY</span>=your_amplitude_key
+      </div>
+      <div class="install-code" id="tab-run">
+        <span class="cmt"># Interactive menu (recommended for first-time users)</span><br>
+        python main.py<br><br>
+        <span class="cmt"># Full workflow: Jira + Figma + Swagger to Code</span><br>
+        python main.py <span class="kw">--jira</span> PROJ-123 <span class="kw">--figma</span> https://figma.com/file/abc <span class="kw">--swagger</span> ./api.json<br><br>
+        <span class="cmt"># Review a file</span><br>
+        python main.py <span class="kw">--review</span> src/components/UserCard.tsx<br><br>
+        <span class="cmt"># Show all session costs</span><br>
+        python main.py <span class="kw">--costs</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="workflows">
+    <div class="section-header">
+      <div class="section-tag">&#128214; All Workflows</div>
+      <h2>18 Agentic Commands</h2>
+      <p>Click any card to expand the full under-the-hood breakdown and real-world use cases.</p>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" id="search" placeholder="Search commands, use cases&#8230;" oninput="filterCards()" />
+    </div>
+    <div class="filter-row" id="filter-row">
+      <button class="filter-pill active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-pill" onclick="setFilter('full-workflow',this)">Full Workflow</button>
+      <button class="filter-pill" onclick="setFilter('code-quality',this)">Code Quality</button>
+      <button class="filter-pill" onclick="setFilter('testing',this)">Testing</button>
+      <button class="filter-pill" onclick="setFilter('agentic',this)">Agentic Loops</button>
+      <button class="filter-pill" onclick="setFilter('frontend',this)">Frontend</button>
+      <button class="filter-pill" onclick="setFilter('analytics',this)">Analytics &amp; i18n</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="cmd-grid" id="cmd-grid">
+
+    <!-- 1. Full Workflow -->
+    <div class="cmd-card" data-cat="full-workflow" data-keywords="jira figma swagger openapi full workflow generate code production">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-accent">&#128640;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Full Workflow &mdash; Jira + Figma + API &#8594; Code</div>
+          <div class="cmd-subtitle">Generate a complete feature from all three sources in one shot</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --jira</span> <span class="val">PROJ-123</span><span class="arg"> --figma</span> <span class="val">https://figma.com/file/abc123</span><span class="arg"> --swagger</span> <span class="val">./api/swagger.json</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Fetch Jira ticket via REST API</div><div class="step-detail">Pulls title, description, acceptance criteria, labels, story points from Jira Cloud v3.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Fetch Figma design + render screenshot</div><div class="step-detail">Downloads component tree JSON + renders a PNG via Figma API for Claude Vision. Base64-encoded and attached.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Parse OpenAPI / Swagger spec</div><div class="step-detail">Extracts endpoints, request/response schemas, auth headers. Optionally filters by --api-filter path prefix.</div></div>
+          <div class="step"><div class="step-num">STEP 04</div><div class="step-text">Compose mega-prompt with all context</div><div class="step-detail">Merges all three sources into a structured prompt with the Figma screenshot attached (Vision mode).</div></div>
+          <div class="step"><div class="step-num">STEP 05</div><div class="step-text">Claude generates multi-file output</div><div class="step-detail">Returns: component code, API service layer, Jest + RTL unit tests, Playwright E2E, TypeScript types, barrel exports.</div></div>
+          <div class="step"><div class="step-num">STEP 06</div><div class="step-text">Preview &#8594; confirm &#8594; write to disk</div><div class="step-detail">Shows a rich diff preview and prompts before writing. Token costs tracked automatically via TokenTracker.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128230; Outputs</div>
+        <div class="outputs">
+          <span class="output-badge">Component.tsx</span>
+          <span class="output-badge">Component.test.tsx</span>
+          <span class="output-badge">e2e.spec.ts</span>
+          <span class="output-badge">api.service.ts</span>
+          <span class="output-badge">types.ts</span>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-accent"></span>Sprint kickoff &mdash; dev picks up ticket, runs one command, gets full boilerplate</span>
+          <span class="uc"><span class="uc-dot uc-green"></span>Design handoff &mdash; PM shares Figma link, agent generates pixel-accurate React component</span>
+          <span class="uc"><span class="uc-dot uc-yellow"></span>New microservice &mdash; swagger spec &#8594; full service layer + integration tests automatically</span>
+        </div>
+        <div class="cmd-section-title">&#127987;&#65039; Extra Flags</div>
+        <table class="flags-table">
+          <tr><th>Flag</th><th>Description</th><th>Default</th></tr>
+          <tr><td class="flag-name">--stack</td><td class="flag-desc">Override tech stack hint sent to Claude</td><td class="flag-default">.env value</td></tr>
+          <tr><td class="flag-name">--no-tests</td><td class="flag-desc">Skip unit + E2E test generation</td><td class="flag-default">false</td></tr>
+          <tr><td class="flag-name">--output</td><td class="flag-desc">Directory to write generated files</td><td class="flag-default">./src</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. Interactive Mode -->
+    <div class="cmd-card" data-cat="full-workflow" data-keywords="interactive manual paste context no api keys demo">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-blue">&#128394;&#65039;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Interactive Mode</div>
+          <div class="cmd-subtitle">Paste any context manually &mdash; no Jira/Figma API keys required</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --interactive</span><span class="cmt">   # short: -i</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Prompt for Jira ticket text (stdin)</div><div class="step-detail">Multi-line stdin &mdash; paste raw ticket text; two blank lines to confirm entry.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Prompt for Figma description + local screenshot path</div><div class="step-detail">Accepts a local PNG/JPG file path. Claude Vision processes it alongside the text description.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Prompt for API endpoints</div><div class="step-detail">Paste cURL, plain text, or partial JSON &mdash; Claude infers the schema from any format.</div></div>
+          <div class="step"><div class="step-num">STEP 04</div><div class="step-text">Same generation pipeline as full workflow</div><div class="step-detail">Context assembled and sent to Claude with the same structured prompt template and Vision attachment.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-blue"></span>No Jira/Figma API keys &mdash; works with any team setup</span>
+          <span class="uc"><span class="uc-dot uc-green"></span>Quick prototyping from a screenshot and a description</span>
+          <span class="uc"><span class="uc-dot uc-yellow"></span>Demos and workshops &mdash; no environment setup needed</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Code Review -->
+    <div class="cmd-card" data-cat="code-quality" data-keywords="review code quality bugs security performance best practices audit typescript react">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-yellow">&#128269;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Code Review</div>
+          <div class="cmd-subtitle">Deep review for bugs, security, performance, and code style</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --review</span> <span class="val">src/services/userService.ts</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Read file from disk</div><div class="step-detail">Supports .ts, .tsx, .js, .jsx, .py, .java, .go, .rb &mdash; any text-based source file.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Build code review prompt with structured checklist</div><div class="step-detail">Instructs Claude to audit: bugs, race conditions, security (XSS/SQLi/SSRF), performance bottlenecks, TypeScript strictness, React best practices, SOLID/DRY violations.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Stream Claude response to terminal</div><div class="step-detail">Markdown-formatted review with severity ratings (Critical/High/Medium/Low) and concrete fix suggestions with code snippets.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-yellow"></span>Pre-PR review &mdash; catch issues before code hits the team</span>
+          <span class="uc"><span class="uc-dot uc-red"></span>Security audit &mdash; scan auth/payment code for common vulnerabilities</span>
+          <span class="uc"><span class="uc-dot uc-blue"></span>Junior onboarding &mdash; instant, contextual code feedback</span>
+          <span class="uc"><span class="uc-dot uc-green"></span>Legacy cleanup &mdash; understand what a file does and what is wrong with it</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Bug Fix -->
+    <div class="cmd-card" data-cat="code-quality" data-keywords="bug fix error debug crash exception stack trace root cause patch">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-red">&#128027;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Bug Fix Mode</div>
+          <div class="cmd-subtitle">Paste an error or file path and get a complete, reasoned fix</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --fix</span> <span class="val">"TypeError: Cannot read properties of undefined (reading 'map')"</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Detect if input is a file path or raw error text</div><div class="step-detail">If a valid file path, reads the code. Otherwise accepts the error as a string and prompts for the relevant code snippet.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Build bug-fix prompt with reasoning instruction</div><div class="step-detail">Sends error message + code context. Claude reasons through the root cause chain-of-thought style, then produces a corrected code block.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Display fix with explanation</div><div class="step-detail">Response includes: root cause analysis, the exact lines to change, and a "Why this fixes it" section.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-red"></span>Production hotfix &mdash; paste stack trace and get a fix in seconds</span>
+          <span class="uc"><span class="uc-dot uc-orange"></span>Unblock junior devs &mdash; they paste the error and get an explanation + fix</span>
+          <span class="uc"><span class="uc-dot uc-blue"></span>CI failure &mdash; copy failing test output, agent explains and patches the code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Unit Tests -->
+    <div class="cmd-card" data-cat="testing" data-keywords="unit test jest vitest rtl react testing library generate tests coverage">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-green">&#129514;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Unit Test Generator</div>
+          <div class="cmd-subtitle">Generate comprehensive Jest + RTL tests from source code</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --unit-test</span> <span class="val">src/components/PricingTable.tsx</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Read source file and identify exported symbols</div><div class="step-detail">Parses the component or service file. Identifies exported functions, hooks, components, and their TypeScript interfaces.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Analyse prop types and event surface area</div><div class="step-detail">Claude identifies: props variants, conditional renders, event handlers (onClick, onSubmit, onChange), async operations, context consumers.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Generate test file with 8&#8211;15 test cases</div><div class="step-detail">Covers: renders correctly, all prop variants, user events, loading/error/empty states, accessibility roles (getByRole), snapshot test.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128230; Outputs</div>
+        <div class="outputs"><span class="output-badge">PricingTable.test.tsx</span></div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-green"></span>Achieve 80% coverage on untested legacy components instantly</span>
+          <span class="uc"><span class="uc-dot uc-accent"></span>New component TDD &mdash; generate tests first, implement to pass them</span>
+          <span class="uc"><span class="uc-dot uc-yellow"></span>Regression safety net before a major refactor</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Playwright E2E -->
+    <div class="cmd-card" data-cat="testing" data-keywords="playwright e2e end to end browser test automation spec checkout auth">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-pink">&#127917;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Playwright E2E Generator</div>
+          <div class="cmd-subtitle">Generate full browser test suites from component or folder analysis</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --e2e</span> <span class="val">src/pages/Checkout.tsx</span><span class="arg"> --base-url</span> <span class="val">http://localhost:3000</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Collect source files from path</div><div class="step-detail">Single file or entire folder. Walks the tree collecting .tsx/.ts/.jsx/.js, skipping node_modules/dist.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Identify user journeys from code structure</div><div class="step-detail">Claude reads JSX, form handlers, navigation, and conditionals to infer user flows: happy path, error path, and edge cases.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Generate Playwright spec file with AAA pattern</div><div class="step-detail">Uses page.goto(), getByRole(), fill(), click(), expect() assertions. Includes beforeEach setup, data-testid hooks, and comments.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128230; Outputs</div>
+        <div class="outputs"><span class="output-badge">checkout.spec.ts</span></div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-pink"></span>Checkout / payment flows &mdash; generate critical-path E2E tests automatically</span>
+          <span class="uc"><span class="uc-dot uc-blue"></span>Auth flows &mdash; login, signup, password reset E2E coverage in minutes</span>
+          <span class="uc"><span class="uc-dot uc-orange"></span>Regression before a deploy &mdash; generate tests from entire pages/ folder</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Self-Healing Loop -->
+    <div class="cmd-card" data-cat="agentic" data-keywords="self healing loop tests fail fix iterate retry agent jest pytest playwright vitest">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-teal">&#128260;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Self-Healing Test Loop</div>
+          <div class="cmd-subtitle">Run tests &#8594; AI fixes failures &#8594; repeat until all pass</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --heal</span> <span class="val">./my-react-app</span><span class="arg"> --heal-framework</span> <span class="val">jest</span><span class="arg"> --heal-retries</span> <span class="val">5</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Run the full test suite via subprocess</div><div class="step-detail">Executes npx jest / vitest run / playwright test / pytest. Captures stdout, stderr, and exit code.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Parse failing test names and error output</div><div class="step-detail">Extracts structured failure objects: test name, assertion that failed, and stack trace line number.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Send failures + source files to Claude</div><div class="step-detail">Context includes: failing test, source file being tested, and all previous fix attempts to prevent infinite loops.</div></div>
+          <div class="step"><div class="step-num">STEP 04</div><div class="step-text">Apply Claude's fix to disk</div><div class="step-detail">Writes patched files. Records attempt history with timestamps and diff summaries.</div></div>
+          <div class="step"><div class="step-num">STEP 05</div><div class="step-text">Re-run suite &#8594; loop until green or max retries hit</div><div class="step-detail">Terminates on all-pass or max-retries exceeded. Prints a per-attempt healing report with pass/fail counts.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-teal"></span>After a major refactor &mdash; fix all broken tests in one command</span>
+          <span class="uc"><span class="uc-dot uc-green"></span>Dependency upgrade &mdash; new library version breaks 30 tests, heal them overnight</span>
+          <span class="uc"><span class="uc-dot uc-accent"></span>CI pipeline gate &mdash; run heal loop automatically before merge</span>
+          <span class="uc"><span class="uc-dot uc-yellow"></span>Junior devs &mdash; let the agent fix the test red before code review</span>
+        </div>
+        <div class="cmd-section-title">&#127987;&#65039; Extra Flags</div>
+        <table class="flags-table">
+          <tr><th>Flag</th><th>Description</th><th>Default</th></tr>
+          <tr><td class="flag-name">--heal-framework</td><td class="flag-desc">jest | vitest | playwright | pytest</td><td class="flag-default">jest</td></tr>
+          <tr><td class="flag-name">--heal-retries</td><td class="flag-desc">Max healing iterations before giving up</td><td class="flag-default">3</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 8. CI/CD Generator -->
+    <div class="cmd-card" data-cat="agentic" data-keywords="ci cd github actions workflow pipeline lint quality gate pr review">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-orange">&#9881;&#65039;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">CI/CD Workflow Generator</div>
+          <div class="cmd-subtitle">Auto-generate GitHub Actions pipelines with AI review, tests, quality gates</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --ci</span><span class="arg"> --output</span> <span class="val">./my-project</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood &mdash; 3 Workflow Files Generated</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">WORKFLOW 1</div><div class="step-text">&#128269; AI PR Review (ai-review.yml)</div><div class="step-detail">Triggers on pull_request. Detects changed files, sends diffs to Claude via the API, posts a structured review comment back to GitHub via the PR Checks API.</div></div>
+          <div class="step"><div class="step-num">WORKFLOW 2</div><div class="step-text">&#129514; Auto-Generate Tests (auto-generate-tests.yml)</div><div class="step-detail">Triggers on push. Finds source files with no test counterpart, generates tests, and opens a new PR with the test files attached as commits.</div></div>
+          <div class="step"><div class="step-num">WORKFLOW 3</div><div class="step-text">&#128737;&#65039; Quality Gate (quality-gate.yml)</div><div class="step-detail">Runs ESLint, TypeScript compiler, full test suite, and coverage threshold check. Fails the PR if any gate fails. Blocks merge until green.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128230; Outputs</div>
+        <div class="outputs">
+          <span class="output-badge">.github/workflows/ai-review.yml</span>
+          <span class="output-badge">auto-generate-tests.yml</span>
+          <span class="output-badge">quality-gate.yml</span>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-orange"></span>Solo projects &mdash; get AI code review on every PR even without a team</span>
+          <span class="uc"><span class="uc-dot uc-green"></span>Startups &mdash; ship quality gates without a dedicated DevOps engineer</span>
+          <span class="uc"><span class="uc-dot uc-accent"></span>OSS projects &mdash; automated review for community contributions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. RAG Index -->
+    <div class="cmd-card" data-cat="agentic" data-keywords="rag vector search index codebase chromadb semantic embeddings">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-purple">&#128218;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">RAG &mdash; Index Codebase</div>
+          <div class="cmd-subtitle">Embed your entire codebase into a local ChromaDB vector database</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --index</span> <span class="val">./my-project</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Walk directory tree, collect 25+ file types</div><div class="step-detail">Scans .ts, .tsx, .js, .py, .go, .java, .md, .yaml and more. Excludes node_modules/dist/coverage/.git.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Chunk files with overlapping windows</div><div class="step-detail">Each file split into 100-line chunks with 50-line stride to preserve context across boundaries.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Embed chunks with ChromaDB sentence transformer</div><div class="step-detail">Local embeddings &mdash; no external API calls, fully offline. Persistent vector store in .rag_index/.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-purple"></span>New team member &mdash; index the codebase and ask "how does auth work?"</span>
+          <span class="uc"><span class="uc-dot uc-blue"></span>Large monorepos &mdash; find where a pattern is used across 500+ files instantly</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. RAG Search -->
+    <div class="cmd-card" data-cat="agentic" data-keywords="rag vector search query find code context semantic codebase chromadb">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-purple">&#128270;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">RAG &mdash; Semantic Code Search</div>
+          <div class="cmd-subtitle">Ask natural-language questions about your codebase</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --index</span> <span class="val">./my-project</span><span class="arg"> --search</span> <span class="val">"how does JWT auth refresh work"</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Embed the search query into the same vector space</div><div class="step-detail">Query text is embedded with the same sentence transformer used for indexing.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Cosine similarity search &mdash; top-10 results</div><div class="step-detail">ChromaDB returns the 10 most semantically similar code chunks with similarity scores.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Display results with file + line context</div><div class="step-detail">Rich table: file path, line range, similarity score, and a code preview snippet.</div></div>
+          <div class="step"><div class="step-num">STEP 04 (optional)</div><div class="step-text">Feed results as Claude context for further instructions</div><div class="step-detail">Prompts "Use these results as context?" &mdash; then lets you give an instruction like "refactor this to use Zustand".</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-purple"></span>Impact analysis &mdash; "find all places that call the payment API" before a change</span>
+          <span class="uc"><span class="uc-dot uc-teal"></span>Documentation &mdash; search + explain code to generate inline docs</span>
+          <span class="uc"><span class="uc-dot uc-accent"></span>Guided refactor &mdash; find and replace patterns across the whole codebase</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. Session Costs -->
+    <div class="cmd-card" data-cat="agentic" data-keywords="costs tokens pricing usage track session budget">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-yellow">&#128176;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Session Cost Tracker</div>
+          <div class="cmd-subtitle">Track every token and dollar spent across 30+ models per session</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --costs</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">ALWAYS ON</div><div class="step-text">Singleton TokenTracker intercepts every API call</div><div class="step-detail">Wrapped into ClaudeAgent.generate_code() and ClaudeAgent.chat(). Records model, input tokens, output tokens, timestamp, and workflow name per call.</div></div>
+          <div class="step"><div class="step-num">PRICING</div><div class="step-text">MODEL_PRICING dict with 30+ models</div><div class="step-detail">Claude 4.5/4.6/Opus, GPT-4.1/5, Gemini 3, Grok 3 and more. Falls back to claude-sonnet pricing for unknown models.</div></div>
+          <div class="step"><div class="step-num">--costs</div><div class="step-text">Print session summary table</div><div class="step-detail">Rich table: per-call breakdown + session total. Shows input/output tokens, cost per call, and cumulative cost.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-yellow"></span>Budget management &mdash; know exactly what each workflow costs</span>
+          <span class="uc"><span class="uc-dot uc-green"></span>Model comparison &mdash; run same workflow with different models and compare spend</span>
+          <span class="uc"><span class="uc-dot uc-accent"></span>Team billing &mdash; track API spend for internal chargeback</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. A11y Healer -->
+    <div class="cmd-card" data-cat="frontend" data-keywords="accessibility a11y wcag aria alt label role keyboard focus screen reader">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-teal">&#9855;&#65039;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">A11y Healer</div>
+          <div class="cmd-subtitle">Auto-detect and fix all WCAG 2.1 AA violations across your project</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --heal-a11y</span> <span class="val">./src</span><span class="arg"> --a11y-dry-run</span><span class="cmt">   # preview only</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Collect all frontend files (.tsx, .jsx, .html, .vue)</div><div class="step-detail">Walks the project directory, skips node_modules/dist/build/coverage.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Send each file to Claude with WCAG 2.1 AA checklist</div><div class="step-detail">Checks: missing alt, unlabelled inputs, icon buttons without aria-label, onClick on div without role="button", missing aria-live, landmark elements, focus traps on modals.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Claude rewrites the file with fixes inline</div><div class="step-detail">Every change annotated with // a11y: &lt;reason&gt;. Logic, styling, and test IDs are never touched.</div></div>
+          <div class="step"><div class="step-num">STEP 04</div><div class="step-text">Preview diff &#8594; confirm &#8594; write to disk</div><div class="step-detail">Shows which files changed. --a11y-dry-run skips the write step entirely for a safe preview.</div></div>
+        </div>
+        <div class="cmd-section-title">Issues Fixed</div>
+        <div class="use-cases">
+          <span class="uc">Missing alt on images</span>
+          <span class="uc">Inputs without label</span>
+          <span class="uc">Icon buttons missing aria-label</span>
+          <span class="uc">onClick on div without role="button"</span>
+          <span class="uc">Missing aria-live on dynamic content</span>
+          <span class="uc">Dialogs without focus trap</span>
+          <span class="uc">Non-descriptive link text</span>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-teal"></span>Pre-launch compliance &mdash; fix all WCAG issues before a public release</span>
+          <span class="uc"><span class="uc-dot uc-blue"></span>Enterprise requirement &mdash; government/finance clients require AA compliance</span>
+          <span class="uc"><span class="uc-dot uc-green"></span>Design handoff &mdash; immediately fix a11y issues in new Figma-generated components</span>
+        </div>
+        <div class="cmd-section-title">&#127987;&#65039; Flags</div>
+        <table class="flags-table">
+          <tr><th>Flag</th><th>Description</th></tr>
+          <tr><td class="flag-name">--a11y-file</td><td class="flag-desc">Heal a single file instead of the whole directory</td></tr>
+          <tr><td class="flag-name">--a11y-dry-run</td><td class="flag-desc">Preview changes without writing any files</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 13. Component Matrix -->
+    <div class="cmd-card" data-cat="frontend" data-keywords="component generate scaffold styled-components antd ant design typescript react tsx test types barrel">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-accent">&#129513;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Component Matrix Generator</div>
+          <div class="cmd-subtitle">4-file component scaffold &mdash; Styled-Components v6 or Ant Design 6</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --new-component</span> <span class="val">PricingTable</span><span class="arg"> --component-desc</span> <span class="val">"3-tier pricing with monthly/annual toggle"</span><span class="arg"> --style-lib</span> <span class="val">antd</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Build structured component prompt</div><div class="step-detail">Combines: name, type (atom/molecule/organism/page), description, style library, and props hint.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Claude generates 4 production-quality files</div><div class="step-detail">All files are type-safe, accessible (aria attributes included), and not placeholder stubs.</div></div>
+          <div class="step"><div class="step-num">SC mode</div><div class="step-text">styled.xxx tagged template literals</div><div class="step-detail">Zero inline style={{}} objects. ThemeProvider-compatible. Conditional styles via css helper. S.Container naming convention.</div></div>
+          <div class="step"><div class="step-num">AntD 6 mode</div><div class="step-text">AntD component props natively</div><div class="step-detail">Space/Flex/Row+Col layout, Typography, ConfigProvider theme tokens. Custom CSS only when no AntD prop exists.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128230; Outputs (4 files)</div>
+        <div class="outputs">
+          <span class="output-badge">PricingTable.tsx</span>
+          <span class="output-badge">PricingTable.test.tsx</span>
+          <span class="output-badge">PricingTable.types.ts</span>
+          <span class="output-badge">index.ts</span>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-accent"></span>Design system &mdash; generate new components that match your AntD theme</span>
+          <span class="uc"><span class="uc-dot uc-green"></span>Sprint velocity &mdash; skip boilerplate, start with a production-ready scaffold</span>
+          <span class="uc"><span class="uc-dot uc-yellow"></span>Consistency &mdash; all new components follow the same type+test+barrel pattern</span>
+        </div>
+        <div class="cmd-section-title">Component Types</div>
+        <table class="flags-table">
+          <tr><th>Type</th><th>Description</th></tr>
+          <tr><td class="flag-name">atom</td><td class="flag-desc">Single-purpose primitive (Button, Badge, Spinner, Avatar)</td></tr>
+          <tr><td class="flag-name">molecule</td><td class="flag-desc">Composed of atoms (SearchBar, FormField, UserCard)</td></tr>
+          <tr><td class="flag-name">organism</td><td class="flag-desc">Complex section (Navbar, DataTable, PricingTable, Sidebar)</td></tr>
+          <tr><td class="flag-name">page</td><td class="flag-desc">Full route component (LoginPage, DashboardPage)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 14. Style Refactor -->
+    <div class="cmd-card" data-cat="frontend" data-keywords="refactor styles inline css styled-components antd migrate convert legacy">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-orange">&#129529;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Style Refactor Agent</div>
+          <div class="cmd-subtitle">Migrate inline style={{}} objects to Styled-Components or Ant Design 6</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --refactor-styles</span> <span class="val">./src</span><span class="arg"> --refactor-target</span> <span class="val">styled-components</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Scan project for files containing style={{}}</div><div class="step-detail">Looks for style={{, style=" in .tsx/.jsx/.ts/.js files. Builds a list of affected files and shows a summary table.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Confirm before proceeding</div><div class="step-detail">Lists all files with inline styles, file sizes, estimated changes, and asks for confirmation before any writes.</div></div>
+          <div class="step"><div class="step-num">STEP 03 (SC)</div><div class="step-text">Convert to const S = {} namespace of styled primitives</div><div class="step-detail">Creates S.Container, S.Title etc. at bottom of file. Updates JSX. Annotates with // refactored: styled-components.</div></div>
+          <div class="step"><div class="step-num">STEP 03 (AntD)</div><div class="step-text">Replace with AntD component props natively</div><div class="step-detail">Replaces divs with Space/Flex/Row, text with Typography, custom buttons with Button type="primary".</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-orange"></span>Legacy migration &mdash; remove years of inline styles from a React codebase</span>
+          <span class="uc"><span class="uc-dot uc-pink"></span>Design system adoption &mdash; force-align all components to AntD 6</span>
+          <span class="uc"><span class="uc-dot uc-teal"></span>Theming &mdash; inline styles break dark mode; styled-components fixes it</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 15. Amplitude -->
+    <div class="cmd-card" data-cat="analytics" data-keywords="amplitude analytics tracking events hooks product analytics sdk typed typescript">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-blue">&#128202;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Amplitude Analytics Integration</div>
+          <div class="cmd-subtitle">Auto-generate typed Amplitude SDK v2 integration from your codebase</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --add-analytics</span> <span class="val">./src</span><span class="arg"> --app-name</span> <span class="val">"My SaaS App"</span><span class="arg"> --env-prefix</span> <span class="val">NEXT_PUBLIC</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Scan project for interaction signals</div><div class="step-detail">Finds onClick, onSubmit, onChange, useEffect, useNavigate/useRouter in .tsx/.jsx/.ts/.js files. Collects up to 25 representative files.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Claude infers an event catalog</div><div class="step-detail">From scanned code: page views, button clicks, form interactions, auth events, feature usage, errors. Named using SCREAMING_SNAKE_CASE convention.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Generate typed AMPLITUDE_EVENTS + EventProperties</div><div class="step-detail">Every event has a strictly typed properties shape. TypeScript will error if you call track() with wrong properties.</div></div>
+          <div class="step"><div class="step-num">STEP 04</div><div class="step-text">Generate SDK wrapper + 4 React hooks</div><div class="step-detail">initAmplitude(), track&lt;E&gt;(), identify(), resetUser(). Plus: usePageTracking, useButtonTracking, useFormTracking, useFeatureTracking.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128230; Outputs (4 files)</div>
+        <div class="outputs">
+          <span class="output-badge">src/analytics/events.ts</span>
+          <span class="output-badge">amplitude.ts</span>
+          <span class="output-badge">useTracking.ts</span>
+          <span class="output-badge">index.ts</span>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-blue"></span>Product analytics &mdash; track user behaviour without manual event planning</span>
+          <span class="uc"><span class="uc-dot uc-green"></span>New project setup &mdash; add full analytics in one command instead of days of wiring</span>
+          <span class="uc"><span class="uc-dot uc-accent"></span>Type safety &mdash; TypeScript ensures no event name typos or missing properties</span>
+          <span class="uc"><span class="uc-dot uc-yellow"></span>Funnel analysis &mdash; page tracking + form tracking gives full conversion funnel data</span>
+        </div>
+        <div class="cmd-section-title">&#127987;&#65039; Flags</div>
+        <table class="flags-table">
+          <tr><th>Flag</th><th>Description</th><th>Default</th></tr>
+          <tr><td class="flag-name">--app-name</td><td class="flag-desc">App name used in events catalog and init comment</td><td class="flag-default">My App</td></tr>
+          <tr><td class="flag-name">--env-prefix</td><td class="flag-desc">NEXT_PUBLIC | VITE | REACT_APP</td><td class="flag-default">NEXT_PUBLIC</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 16. i18n -->
+    <div class="cmd-card" data-cat="analytics" data-keywords="i18n translations react-i18next multilingual locale json language switcher extract strings internationalisation">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-green">&#127757;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">i18n / Translations Agent</div>
+          <div class="cmd-subtitle">Extract strings, generate 10-locale JSON files + full react-i18next v14 setup</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --add-i18n</span> <span class="val">./src</span><span class="arg"> --locales</span> <span class="val">en,es,fr,de,ja,zh</span><span class="arg"> --i18n-ns</span> <span class="val">translation</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Scan JSX for hardcoded strings</div><div class="step-detail">Finds: JSX text nodes, placeholder, label, aria-label, title, tooltip text, error messages, success messages, button text.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Claude organises strings into a key hierarchy</div><div class="step-detail">Groups by context: common.save, auth.sign_in, dashboard.empty_state, form.required_field. Uses snake_case keys.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Translate into every requested locale</div><div class="step-detail">English is the source of truth. Each locale translated accurately. Arabic gets RTL annotation. CJK uses formal register.</div></div>
+          <div class="step"><div class="step-num">STEP 04</div><div class="step-text">Generate react-i18next v14 integration files</div><div class="step-detail">i18n.ts init with HttpBackend + LanguageDetector, TypeScript namespace for t() autocomplete, useAppTranslation hook, AntD 6 LanguageSwitcher dropdown.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128230; Outputs</div>
+        <div class="outputs">
+          <span class="output-badge">public/locales/en/translation.json</span>
+          <span class="output-badge">es/translation.json</span>
+          <span class="output-badge">src/i18n.ts</span>
+          <span class="output-badge">i18next.d.ts</span>
+          <span class="output-badge">useAppTranslation.ts</span>
+          <span class="output-badge">LanguageSwitcher.tsx</span>
+        </div>
+        <div class="cmd-section-title">&#127758; Supported Locales</div>
+        <div class="use-cases">
+          <span class="uc">&#127468;&#127463; en</span><span class="uc">&#127466;&#127480; es</span><span class="uc">&#127467;&#127479; fr</span>
+          <span class="uc">&#127465;&#127466; de</span><span class="uc">&#127471;&#127477; ja</span><span class="uc">&#127464;&#127475; zh</span>
+          <span class="uc">&#127477;&#127481; pt</span><span class="uc">&#127480;&#127462; ar (RTL)</span><span class="uc">&#127472;&#127479; ko</span><span class="uc">&#127470;&#127475; hi</span>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-green"></span>Global launch &mdash; add 10 languages to an existing app in one command</span>
+          <span class="uc"><span class="uc-dot uc-blue"></span>RTL support &mdash; Arabic translations with dir="rtl" annotations ready</span>
+          <span class="uc"><span class="uc-dot uc-accent"></span>Type-safe translations &mdash; t('auth.sign_in') autocompletes in your IDE</span>
+          <span class="uc"><span class="uc-dot uc-yellow"></span>CMS integration &mdash; JSON files slot directly into most headless CMS platforms</span>
+        </div>
+        <div class="cmd-section-title">&#127987;&#65039; Flags</div>
+        <table class="flags-table">
+          <tr><th>Flag</th><th>Description</th><th>Default</th></tr>
+          <tr><td class="flag-name">--locales</td><td class="flag-desc">Comma-separated locale codes (up to 10)</td><td class="flag-default">en,es,fr,de,ja,zh,pt,ar,ko,hi</td></tr>
+          <tr><td class="flag-name">--i18n-ns</td><td class="flag-desc">Namespace name for translation files</td><td class="flag-default">translation</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 17. Fetch Jira only -->
+    <div class="cmd-card" data-cat="full-workflow" data-keywords="jira fetch ticket atlassian sprint backlog preview context">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-blue">&#128203;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Fetch Jira Ticket (Preview)</div>
+          <div class="cmd-subtitle">Pull a Jira ticket and inspect its context before generating code</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --jira</span> <span class="val">PROJ-123</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Connect to Jira Cloud REST API v3</div><div class="step-detail">Uses JIRA_BASE_URL + JIRA_EMAIL + JIRA_API_TOKEN from .env. Falls back to manual input if not configured.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Parse ticket fields into structured context</div><div class="step-detail">Extracts: summary, description (ADF &#8594; plaintext), acceptance criteria, labels, story points, assignee, sprint.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Print formatted context string</div><div class="step-detail">Same context string that would be sent to Claude &mdash; useful for debugging or copy-paste into other tools.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-blue"></span>Verify context before a full workflow run</span>
+          <span class="uc"><span class="uc-dot uc-muted"></span>Export ticket content for standup documentation</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18. Fetch Figma only -->
+    <div class="cmd-card" data-cat="full-workflow" data-keywords="figma design fetch component tree screenshot vision api inspect">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon ic-pink">&#127912;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">Fetch Figma Design (Preview)</div>
+          <div class="cmd-subtitle">Pull a Figma file's component tree + screenshot for inspection</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --figma</span> <span class="val">https://figma.com/file/abc123/My-Design</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Parse Figma URL &#8594; file_key + node_id</div><div class="step-detail">Regex extracts the file key and optional node/component ID from any Figma URL format.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Fetch component tree via Figma REST API</div><div class="step-detail">GET /v1/files/{key}/nodes &mdash; retrieves design structure, layer names, auto-layout, component properties.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Render PNG screenshot</div><div class="step-detail">GET /v1/images &mdash; renders the node as a 1x PNG, downloads and base64-encodes for Claude Vision attachment.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot uc-pink"></span>Inspect design context before code gen</span>
+          <span class="uc"><span class="uc-dot uc-accent"></span>Verify Figma API token is working correctly</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-results" id="no-results">No commands match your search.</div>
+  </div>
+
+  <!-- Quick Reference Table -->
+  <div class="section" id="quick-ref">
+    <div class="section-header">
+      <div class="section-tag">&#9889; Quick Reference</div>
+      <h2>All Commands at a Glance</h2>
+      <p>Copy-paste any command directly. All flags work with <code style="color:var(--accent);font-family:var(--mono);background:var(--bg-code);padding:2px 6px;border-radius:5px">python main.py</code></p>
+    </div>
+    <div class="ref-wrap">
+      <table class="ref-table">
+        <thead>
+          <tr><th>Command</th><th>What it does</th><th>Category</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="ref-cmd">--jira PROJ-123 --figma URL --swagger ./api.json</td><td class="ref-desc">Full workflow: Jira + Figma + OpenAPI &#8594; code + tests</td><td><span class="ref-cat" style="background:var(--accent-dim);color:var(--accent)">Workflow</span></td></tr>
+          <tr><td class="ref-cmd">--interactive</td><td class="ref-desc">Paste any context manually (no API keys needed)</td><td><span class="ref-cat" style="background:var(--accent-dim);color:var(--accent)">Workflow</span></td></tr>
+          <tr><td class="ref-cmd">--review ./src/file.tsx</td><td class="ref-desc">Deep code review (bugs, security, performance)</td><td><span class="ref-cat" style="background:var(--yellow-dim);color:var(--yellow)">Quality</span></td></tr>
+          <tr><td class="ref-cmd">--fix "TypeError: ..."</td><td class="ref-desc">Root-cause analysis + patched code fix</td><td><span class="ref-cat" style="background:var(--red-dim);color:var(--red)">Quality</span></td></tr>
+          <tr><td class="ref-cmd">--unit-test ./src/Component.tsx</td><td class="ref-desc">Generate Jest + RTL unit tests (8&#8211;15 cases)</td><td><span class="ref-cat" style="background:var(--green-dim);color:var(--green)">Testing</span></td></tr>
+          <tr><td class="ref-cmd">--e2e ./src/pages/Checkout.tsx --base-url URL</td><td class="ref-desc">Generate Playwright E2E test spec</td><td><span class="ref-cat" style="background:var(--green-dim);color:var(--green)">Testing</span></td></tr>
+          <tr><td class="ref-cmd">--heal ./project --heal-framework jest --heal-retries 5</td><td class="ref-desc">Self-healing test loop until all tests pass</td><td><span class="ref-cat" style="background:var(--teal-dim);color:var(--teal)">Agentic</span></td></tr>
+          <tr><td class="ref-cmd">--ci --output ./project</td><td class="ref-desc">Generate 3 GitHub Actions CI/CD workflow files</td><td><span class="ref-cat" style="background:var(--teal-dim);color:var(--teal)">Agentic</span></td></tr>
+          <tr><td class="ref-cmd">--index ./project</td><td class="ref-desc">Embed codebase into local ChromaDB vector store</td><td><span class="ref-cat" style="background:var(--purple-dim);color:var(--purple)">RAG</span></td></tr>
+          <tr><td class="ref-cmd">--index ./project --search "JWT auth refresh"</td><td class="ref-desc">Semantic code search (top-10 similar chunks)</td><td><span class="ref-cat" style="background:var(--purple-dim);color:var(--purple)">RAG</span></td></tr>
+          <tr><td class="ref-cmd">--costs</td><td class="ref-desc">Print session token usage + cost breakdown</td><td><span class="ref-cat" style="background:var(--yellow-dim);color:var(--yellow)">Tracking</span></td></tr>
+          <tr><td class="ref-cmd">--heal-a11y ./src --a11y-dry-run</td><td class="ref-desc">Preview WCAG 2.1 AA fixes (no file writes)</td><td><span class="ref-cat" style="background:var(--teal-dim);color:var(--teal)">Frontend</span></td></tr>
+          <tr><td class="ref-cmd">--heal-a11y ./src</td><td class="ref-desc">Auto-fix all WCAG 2.1 AA violations in project</td><td><span class="ref-cat" style="background:var(--teal-dim);color:var(--teal)">Frontend</span></td></tr>
+          <tr><td class="ref-cmd">--new-component PricingTable --component-desc "..." --style-lib antd</td><td class="ref-desc">Generate 4-file component scaffold (TSX+test+types+barrel)</td><td><span class="ref-cat" style="background:var(--teal-dim);color:var(--teal)">Frontend</span></td></tr>
+          <tr><td class="ref-cmd">--refactor-styles ./src --refactor-target styled-components</td><td class="ref-desc">Migrate all inline styles to Styled-Components v6</td><td><span class="ref-cat" style="background:var(--teal-dim);color:var(--teal)">Frontend</span></td></tr>
+          <tr><td class="ref-cmd">--add-analytics ./src --app-name "App" --env-prefix VITE</td><td class="ref-desc">Generate full typed Amplitude SDK v2 integration</td><td><span class="ref-cat" style="background:var(--blue-dim);color:var(--blue)">Analytics</span></td></tr>
+          <tr><td class="ref-cmd">--add-i18n ./src --locales en,es,fr,de,ja,zh</td><td class="ref-desc">Extract strings + generate react-i18next v14 for 6 locales</td><td><span class="ref-cat" style="background:var(--green-dim);color:var(--green)">i18n</span></td></tr>
+          <tr><td class="ref-cmd">--jira PROJ-123</td><td class="ref-desc">Fetch + preview Jira ticket context only</td><td><span class="ref-cat" style="background:var(--accent-dim);color:var(--accent)">Workflow</span></td></tr>
+          <tr><td class="ref-cmd">--figma https://figma.com/file/&#8230;</td><td class="ref-desc">Fetch + preview Figma component tree + screenshot</td><td><span class="ref-cat" style="background:var(--accent-dim);color:var(--accent)">Workflow</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="height:80px"></div>
+</div>
+
+<footer>
+  <p>Built with &#10084;&#65039; using <a href="https://www.anthropic.com" target="_blank">Claude by Anthropic</a> &middot;
+     <a href="https://github.com/BaluRaut/ai-dev-toolkit" target="_blank">GitHub Repository</a> &middot;
+     Deployed via GitHub Pages
+  </p>
+  <p style="margin-top:8px;font-size:.78rem;">18 workflows &middot; 30+ AI models &middot; React &middot; TypeScript &middot; Python</p>
+</footer>
+
+<script>
+  function switchTab(btn, id) {
+    btn.closest('.install-block').querySelectorAll('.install-tab button').forEach(b => b.classList.remove('active'));
+    btn.closest('.install-block').querySelectorAll('.install-code').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+  function toggle(header) {
+    const card = header.closest('.cmd-card');
+    const wasOpen = card.classList.contains('open');
+    document.querySelectorAll('.cmd-card.open').forEach(c => c.classList.remove('open'));
+    if (!wasOpen) card.classList.add('open');
+  }
+  let activeFilter = 'all';
+  function setFilter(cat, btn) {
+    activeFilter = cat;
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+  function filterCards() { applyFilters(); }
+  function applyFilters() {
+    const q = document.getElementById('search').value.toLowerCase().trim();
+    const cards = document.querySelectorAll('#cmd-grid .cmd-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const cat  = card.dataset.cat || '';
+      const kw   = (card.dataset.keywords || '') + ' ' + (card.querySelector('.cmd-title')?.textContent || '') + ' ' + (card.querySelector('.cmd-subtitle')?.textContent || '');
+      const catOk = activeFilter === 'all' || cat === activeFilter;
+      const kwOk  = !q || kw.toLowerCase().includes(q);
+      const show  = catOk && kwOk;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+  }
+  document.querySelector('.cmd-card')?.classList.add('open');
+</script>
 </body>
 </html>
