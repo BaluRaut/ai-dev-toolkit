@@ -10,33 +10,33 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:          #080810;
-      --bg-nav:      rgba(8,8,16,0.85);
-      --bg-card:     #10101c;
-      --bg-code:     #0d0d1a;
-      --border:      #1e1e30;
-      --border-hi:   #2e2e4a;
-      --text:        #e2e2ee;
-      --muted:       #7070a0;
-      --accent:      #818cf8;
-      --accent-dim:  rgba(129,140,248,0.12);
-      --accent-glow: rgba(129,140,248,0.25);
-      --green:       #34d399;
-      --green-dim:   rgba(52,211,153,0.12);
-      --yellow:      #fbbf24;
-      --yellow-dim:  rgba(251,191,36,0.12);
-      --pink:        #f472b6;
-      --pink-dim:    rgba(244,114,182,0.12);
-      --blue:        #60a5fa;
-      --blue-dim:    rgba(96,165,250,0.12);
-      --orange:      #fb923c;
-      --orange-dim:  rgba(251,146,60,0.12);
-      --teal:        #2dd4bf;
-      --teal-dim:    rgba(45,212,191,0.12);
-      --purple:      #c084fc;
-      --purple-dim:  rgba(192,132,252,0.12);
-      --red:         #f87171;
-      --red-dim:     rgba(248,113,113,0.12);
+      --bg:          #f5f6fc;
+      --bg-nav:      rgba(255,255,255,0.95);
+      --bg-card:     #ffffff;
+      --bg-code:     #eef0f8;
+      --border:      #e2e4ee;
+      --border-hi:   #c8cadc;
+      --text:        #111128;
+      --muted:       #6b6f94;
+      --accent:      #5b5ef6;
+      --accent-dim:  rgba(91,94,246,0.10);
+      --accent-glow: rgba(91,94,246,0.22);
+      --green:       #059669;
+      --green-dim:   rgba(5,150,105,0.10);
+      --yellow:      #b45309;
+      --yellow-dim:  rgba(180,83,9,0.10);
+      --pink:        #be185d;
+      --pink-dim:    rgba(190,24,93,0.10);
+      --blue:        #1d4ed8;
+      --blue-dim:    rgba(29,78,216,0.10);
+      --orange:      #c2410c;
+      --orange-dim:  rgba(194,65,12,0.10);
+      --teal:        #0f766e;
+      --teal-dim:    rgba(15,118,110,0.10);
+      --purple:      #6d28d9;
+      --purple-dim:  rgba(109,40,217,0.10);
+      --red:         #dc2626;
+      --red-dim:     rgba(220,38,38,0.10);
       --radius:      14px;
       --mono:        'JetBrains Mono', 'Fira Code', monospace;
     }
@@ -52,9 +52,9 @@
     .ambient {
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background:
-        radial-gradient(ellipse 60% 40% at 15% 20%, rgba(129,140,248,.07) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 35% at 85% 75%, rgba(244,114,182,.06) 0%, transparent 55%),
-        radial-gradient(ellipse 40% 30% at 50% 50%, rgba(52,211,153,.04) 0%, transparent 50%);
+        radial-gradient(ellipse 60% 40% at 15% 20%, rgba(91,94,246,.05) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 35% at 85% 75%, rgba(190,24,93,.04) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 30% at 50% 50%, rgba(5,150,105,.03) 0%, transparent 50%);
     }
     nav {
       position: sticky; top: 0; z-index: 100;
@@ -84,7 +84,7 @@
     }
     .nav-links a:hover { color: var(--text); background: var(--border); }
     .nav-cta { background: var(--accent); color: #fff !important; padding: 7px 16px !important; border-radius: 8px !important; }
-    .nav-cta:hover { background: #6366f1 !important; color: #fff !important; }
+    .nav-cta:hover { background: #4338ca !important; color: #fff !important; }
     .wrap { max-width: 1280px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
     .hero { text-align: center; padding: 90px 32px 60px; position: relative; z-index: 1; }
     .hero-badge {
@@ -96,14 +96,14 @@
     }
     .hero h1 {
       font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 900; line-height: 1.1; margin-bottom: 22px;
-      background: linear-gradient(140deg, #fff 0%, #818cf8 45%, #f472b6 100%);
+      background: linear-gradient(140deg, #1e1b4b 0%, #5b5ef6 45%, #be185d 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .hero p { font-size: 1.1rem; color: var(--muted); max-width: 660px; margin: 0 auto 36px; }
     .btn-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
     .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 26px; border-radius: 12px; font-size: .95rem; font-weight: 600; text-decoration: none; transition: all .2s; border: none; cursor: pointer; }
     .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: #6366f1; transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+    .btn-primary:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
     .btn-ghost { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
     .btn-ghost:hover { border-color: var(--accent); transform: translateY(-2px); }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; padding: 40px 0; }
@@ -118,7 +118,7 @@
     .cmd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(540px, 1fr)); gap: 20px; }
     @media (max-width: 680px) { .cmd-grid { grid-template-columns: 1fr; } }
     .cmd-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color .2s, box-shadow .2s; }
-    .cmd-card:hover { border-color: var(--border-hi); box-shadow: 0 4px 32px rgba(0,0,0,.4); }
+    .cmd-card:hover { border-color: var(--border-hi); box-shadow: 0 4px 24px rgba(91,94,246,.10); }
     .cmd-header { padding: 20px 22px 16px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; user-select: none; }
     .cmd-icon { width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
     .cmd-meta { flex: 1; min-width: 0; }
@@ -151,7 +151,7 @@
     .flag-desc { color: var(--muted); }
     .flag-default { font-family: var(--mono); font-size: .75rem; color: var(--yellow); }
     .outputs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-    .output-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-family: var(--mono); padding: 4px 10px; border-radius: 7px; background: var(--green-dim); border: 1px solid rgba(52,211,153,.25); color: var(--green); }
+    .output-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-family: var(--mono); padding: 4px 10px; border-radius: 7px; background: var(--green-dim); border: 1px solid rgba(5,150,105,.25); color: var(--green); }
     .ic-accent { background: var(--accent-dim); }
     .ic-green  { background: var(--green-dim); }
     .ic-yellow { background: var(--yellow-dim); }
@@ -175,7 +175,7 @@
     .ref-table th { text-align: left; padding: 12px 18px; background: var(--bg-code); color: var(--muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
     .ref-table td { padding: 11px 18px; border-bottom: 1px solid var(--border); vertical-align: top; }
     .ref-table tr:last-child td { border-bottom: none; }
-    .ref-table tr:hover td { background: rgba(255,255,255,.02); }
+    .ref-table tr:hover td { background: rgba(0,0,0,.025); }
     .ref-cmd { font-family: var(--mono); font-size: .78rem; color: var(--green); }
     .ref-desc { color: var(--muted); }
     .ref-cat { display: inline-block; font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .06em; }
@@ -203,6 +203,28 @@
     .no-results { text-align: center; color: var(--muted); padding: 60px 0; display: none; grid-column: 1 / -1; }
     @media (max-width: 900px) { .wrap { padding: 0 20px; } .nav-links { display: none; } .hero { padding: 60px 20px 40px; } }
     @media (max-width: 600px) { .cmd-grid { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); } }
+    /* ── Decision Guide ─────────────────────────────────────────────── */
+    .decision-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(540px, 1fr)); gap: 24px; }
+    @media (max-width: 680px) { .decision-grid { grid-template-columns: 1fr; } }
+    .decision-block { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+    .decision-block-header { padding: 16px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); }
+    .decision-emoji { font-size: 1.45rem; flex-shrink: 0; line-height: 1; }
+    .decision-block-title { font-size: .95rem; font-weight: 700; color: var(--text); }
+    .decision-block-sub { font-size: .79rem; color: var(--muted); margin-top: 2px; }
+    .dh-purple { background: var(--accent-dim); }
+    .dh-yellow { background: var(--yellow-dim); }
+    .dh-green  { background: var(--green-dim); }
+    .dh-teal   { background: var(--teal-dim); }
+    .dh-blue   { background: var(--blue-dim); }
+    .dh-pink   { background: var(--pink-dim); }
+    .dh-mcp    { background: var(--purple-dim); }
+    .ds { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .ds:last-child { border-bottom: none; }
+    .ds-when { font-size: .86rem; font-weight: 600; color: var(--text); margin-bottom: 7px; }
+    .ds-when::before { content: 'IF '; font-size: .68rem; font-weight: 800; letter-spacing: .06em; color: var(--accent); margin-right: 2px; }
+    .ds-cmd { display: block; font-family: var(--mono); font-size: .76rem; color: var(--accent); background: var(--bg-code); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin: 6px 0 8px; overflow-x: auto; white-space: nowrap; }
+    .ds-detail { font-size: .79rem; color: var(--muted); line-height: 1.55; }
+    .ds-detail code { font-family: var(--mono); font-size: .74rem; color: var(--accent); background: var(--bg-code); padding: 1px 5px; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -215,6 +237,7 @@
       <span class="logo-text">Claude AI Dev Toolkit</span>
     </a>
     <div class="nav-links">
+      <a href="#decision-guide">Decision Guide</a>
       <a href="#workflows">Workflows</a>
       <a href="#quick-ref">Quick Ref</a>
       <a href="https://github.com/BaluRaut/ai-dev-toolkit" target="_blank" class="nav-cta">GitHub &#8594;</a>
@@ -288,10 +311,148 @@
     </div>
   </div>
 
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DECISION GUIDE — Which command should I use?
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="section" id="decision-guide">
+    <div class="section-header">
+      <div class="section-tag">&#127919; Decision Guide</div>
+      <h2>Which command should I use?</h2>
+      <p>Every scenario your team will hit — mapped to the right command. Bookmark this, share it with the team, refer to it before every sprint.</p>
+    </div>
+    <div class="decision-grid">
+
+      <!-- ── Feature Development ─────────────────────────────────────── -->
+      <div class="decision-block">
+        <div class="decision-block-header dh-purple">
+          <span class="decision-emoji">&#128640;</span>
+          <div>
+            <div class="decision-block-title">Feature Development</div>
+            <div class="decision-block-sub">Building new features from ticket to production-ready code</div>
+          </div>
+        </div>
+        <div class="ds"><div class="ds-when">You have a Jira ticket + Figma design + Swagger spec</div><code class="ds-cmd">python main.py --jira PROJ-123 --figma URL --swagger ./api.json</code><div class="ds-detail">The gold path. Claude reads all 3 sources and produces a complete feature: React component, service layer, Jest + RTL unit tests, Playwright E2E spec, and TypeScript types — all in one run.</div></div>
+        <div class="ds"><div class="ds-when">You only have a Jira ticket (no Figma or API spec yet)</div><code class="ds-cmd">python main.py --jira PROJ-123 --stack "React 18, TypeScript, AntD 6"</code><div class="ds-detail">Claude generates from the ticket description and acceptance criteria alone. Use <code>--stack</code> to tell it the exact tech stack when it differs from your <code>.env</code> defaults.</div></div>
+        <div class="ds"><div class="ds-when">You have a Figma design + API spec but no Jira ticket</div><code class="ds-cmd">python main.py --figma https://figma.com/file/abc --swagger ./api.json</code><div class="ds-detail">Claude analyses the visual layout and API contract then generates a matching React component with the correct data-fetching layer, loading/error states, and TypeScript interfaces.</div></div>
+        <div class="ds"><div class="ds-when">No API keys set up yet — new hire, demo, client workshop, or CI-free environment</div><code class="ds-cmd">python main.py --interactive</code><div class="ds-detail">Paste ticket text, screenshot path, and API endpoints manually at the prompt. Zero credentials required. Perfect for onboarding sessions or running live demos without exposing .env secrets.</div></div>
+        <div class="ds"><div class="ds-when">You want to verify what context Claude will see before burning tokens on a full run</div><code class="ds-cmd">python main.py --jira PROJ-123</code><div class="ds-detail">Fetches and pretty-prints the Jira ticket context string exactly as Claude would receive it. Confirm acceptance criteria and description are complete before committing to a full generation run.</div></div>
+        <div class="ds"><div class="ds-when">You need to confirm the Figma design exports correctly before coding</div><code class="ds-cmd">python main.py --figma https://figma.com/file/abc123</code><div class="ds-detail">Prints the component tree, colour palette, fonts, and confirms the PNG screenshot rendered correctly. If the screenshot looks wrong, check FIGMA_ACCESS_TOKEN scope — it needs read:files permission.</div></div>
+        <div class="ds"><div class="ds-when">The generated code must skip test files (Figma-only design handoff)</div><code class="ds-cmd">python main.py --jira PROJ-123 --figma URL --swagger ./api.json --no-tests</code><div class="ds-detail">Skips unit test + E2E generation. Useful when your team writes tests manually from acceptance criteria, or when you're generating UI-only components for a design review.</div></div>
+      </div>
+
+      <!-- ── Code Quality ────────────────────────────────────────────── -->
+      <div class="decision-block">
+        <div class="decision-block-header dh-yellow">
+          <span class="decision-emoji">&#128269;</span>
+          <div>
+            <div class="decision-block-title">Code Quality &amp; Bug Fixes</div>
+            <div class="decision-block-sub">Pre-PR reviews, security audits, and production crash fixes</div>
+          </div>
+        </div>
+        <div class="ds"><div class="ds-when">You want a thorough review of a file before raising a PR</div><code class="ds-cmd">python main.py --review src/services/paymentService.ts</code><div class="ds-detail">Produces a severity-graded review (Critical / High / Medium / Low) covering: bugs, race conditions, security holes, TypeScript strictness, React best-practice violations, and SOLID/DRY violations — with concrete fix suggestions and code snippets.</div></div>
+        <div class="ds"><div class="ds-when">Your app crashed with an error in the console or in CI logs</div><code class="ds-cmd">python main.py --fix "TypeError: Cannot read properties of undefined (reading 'map')"</code><div class="ds-detail">Paste the full stack trace. Claude reasons through the call chain chain-of-thought style, identifies the root cause, and produces a patched code block with an explanation of exactly why the fix works.</div></div>
+        <div class="ds"><div class="ds-when">A file has a bug but the CI gives a vague failure with no stack trace</div><code class="ds-cmd">python main.py --fix src/hooks/useAuth.ts</code><div class="ds-detail">Pass a file path instead of an error string. Claude reads the code and performs a combined review + targeted fix — useful when you know which file is broken but not exactly what the error is.</div></div>
+        <div class="ds"><div class="ds-when">A junior developer needs feedback before code review to learn from it</div><code class="ds-cmd">python main.py --review src/components/DataTable.tsx</code><div class="ds-detail">Every issue includes an educational "why this matters" explanation alongside the fix. Great for turning AI feedback into a learning opportunity during pair sessions — not just a diff to apply blindly.</div></div>
+        <div class="ds"><div class="ds-when">You're auditing authentication, payment, or sensitive data handling code</div><code class="ds-cmd">python main.py --review src/api/auth.ts</code><div class="ds-detail">The review prompt explicitly checks OWASP Top-10: XSS, SQLi, SSRF, insecure deserialization, broken auth, hardcoded secrets, CORS misconfig, and missing input validation — all in one pass.</div></div>
+        <div class="ds"><div class="ds-when">Sprint retrospective — you want to audit everything merged this week</div><code class="ds-cmd">python main.py --review src/features/billing/</code><div class="ds-detail">Pass a directory path. The agent reviews each file and aggregates all findings by severity. Ideal for pre-release sweeps of critical modules like the billing or auth feature folder.</div></div>
+      </div>
+
+      <!-- ── Testing ─────────────────────────────────────────────────── -->
+      <div class="decision-block">
+        <div class="decision-block-header dh-green">
+          <span class="decision-emoji">&#129514;</span>
+          <div>
+            <div class="decision-block-title">Testing</div>
+            <div class="decision-block-sub">Unit tests, browser E2E, and auto-healing CI failures</div>
+          </div>
+        </div>
+        <div class="ds"><div class="ds-when">A component or service has zero test coverage and the PM is asking about it</div><code class="ds-cmd">python main.py --unit-test src/components/CheckoutForm.tsx</code><div class="ds-detail">Generates 8–15 Jest + RTL tests covering: renders correctly, all prop variants, user events (click/type/submit), loading/error/empty states, accessibility roles (getByRole), and a snapshot test. Files are immediately runnable — no manual wiring needed.</div></div>
+        <div class="ds"><div class="ds-when">You need browser-level testing for a critical user journey (checkout, auth, onboarding)</div><code class="ds-cmd">python main.py --e2e src/pages/Checkout.tsx --base-url http://localhost:3000</code><div class="ds-detail">Generates a Playwright spec: page.goto, getByRole interactions, form fills, assertions, network intercepts for API mocking, error state handling, mobile viewport test, and a playwright.config.ts ready for CI.</div></div>
+        <div class="ds"><div class="ds-when">CI tests are failing after a major refactor and you've spent hours on it</div><code class="ds-cmd">python main.py --heal ./ --heal-framework jest --heal-retries 5</code><div class="ds-detail">Runs the test suite, reads every failure, patches source code, and loops until all tests pass or retries are exhausted. The agent tracks each fix attempt to avoid infinite loops. Saves hours of manual debugging — especially after large dependency upgrades.</div></div>
+        <div class="ds"><div class="ds-when">A single test file keeps failing after a library version bump</div><code class="ds-cmd">python main.py --heal ./src/components --heal-framework vitest</code><div class="ds-detail">Scope to a subdirectory for faster loops. Supports jest, vitest, playwright, and pytest. The agent reads actual test runner output and patches source files — it never breaks tests to make them pass.</div></div>
+        <div class="ds"><div class="ds-when">You're doing TDD — you want tests written before implementation starts</div><code class="ds-cmd">python main.py --unit-test src/services/notificationService.ts</code><div class="ds-detail">Run on a file that has type signatures and JSDoc but no implementation. Claude generates comprehensive tests from the interface. Implement the functions until the generated test suite goes green.</div></div>
+        <div class="ds"><div class="ds-when">You're refactoring shared code and need a regression safety net first</div><code class="ds-cmd">python main.py --unit-test src/utils/dateFormatters.ts</code><div class="ds-detail">Generate tests covering every exported utility before touching the implementation. Run them after each change to catch regressions immediately — much faster than waiting for code review to spot broken behaviour.</div></div>
+        <div class="ds"><div class="ds-when">You need E2E tests for an entire pages/ directory before a big release</div><code class="ds-cmd">python main.py --e2e src/pages/ --base-url https://staging.myapp.com</code><div class="ds-detail">Pass a folder. The agent collects all page components and generates a spec file per page, covering the most critical user journey for each. Run against your staging URL to validate the full app before go-live.</div></div>
+      </div>
+
+      <!-- ── Automation & Infrastructure ────────────────────────────── -->
+      <div class="decision-block">
+        <div class="decision-block-header dh-teal">
+          <span class="decision-emoji">&#9881;&#65039;</span>
+          <div>
+            <div class="decision-block-title">Automation &amp; Infrastructure</div>
+            <div class="decision-block-sub">CI/CD pipelines, semantic codebase search, and token tracking</div>
+          </div>
+        </div>
+        <div class="ds"><div class="ds-when">Your repo has no CI/CD and you need to set up pipelines fast</div><code class="ds-cmd">python main.py --ci --output ./</code><div class="ds-detail">Generates 3 GitHub Actions workflows: AI PR Review (Claude posts review comments on every PR), Auto-Generate Tests (opens a PR with generated tests for any uncovered source files), and Quality Gate (ESLint + TSC + test coverage threshold blocks merge).</div></div>
+        <div class="ds"><div class="ds-when">A new team member joined and needs to navigate a large unfamiliar codebase</div><code class="ds-cmd">python main.py --index ./src</code><div class="ds-detail">Embeds the entire codebase into a local ChromaDB vector store — no external API, fully offline, persisted in <code>.rag_index/</code>. Takes ~2 min for a typical React app. Run once, then answer queries with <code>--search</code> indefinitely.</div></div>
+        <div class="ds"><div class="ds-when">You need to find where a concept or pattern is used across hundreds of files</div><code class="ds-cmd">python main.py --index ./ --search "JWT token refresh logic"</code><div class="ds-detail">Returns top-10 most semantically similar code chunks with file paths, line numbers, and relevance scores. Beats grep for intent-based queries — catches comments, variable names, and implementation patterns in the same search.</div></div>
+        <div class="ds"><div class="ds-when">You want impact analysis before refactoring a shared utility or hook</div><code class="ds-cmd">python main.py --index ./ --search "usages of useUserPermissions hook"</code><div class="ds-detail">Semantic search finds all call-sites of a pattern — even if the actual name varies slightly. Gives you full blast-radius confidence before modifying shared code that's consumed across the app.</div></div>
+        <div class="ds"><div class="ds-when">You want to document how a complex flow works (for a wiki or PR description)</div><code class="ds-cmd">python main.py --index ./ --search "checkout payment flow from cart to confirmation"</code><div class="ds-detail">Returns the most relevant code chunks. Say "yes" when prompted to use them as context, then ask Claude to "write a technical walkthrough of this flow for our engineering wiki".</div></div>
+        <div class="ds"><div class="ds-when">You want to track AI token costs and justify the ROI to your manager</div><code class="ds-cmd">python main.py --costs</code><div class="ds-detail">Prints every API call in the session: model used, input/output tokens, estimated USD cost per workflow. Run at the end of any multi-command session to see exact spend. Data is aggregated per workflow type so you can compare ROI.</div></div>
+      </div>
+
+      <!-- ── Frontend & UI ───────────────────────────────────────────── -->
+      <div class="decision-block">
+        <div class="decision-block-header dh-blue">
+          <span class="decision-emoji">&#129513;</span>
+          <div>
+            <div class="decision-block-title">Frontend &amp; UI Agents</div>
+            <div class="decision-block-sub">Components, accessibility, style migration, and design systems</div>
+          </div>
+        </div>
+        <div class="ds"><div class="ds-when">Your app fails a WCAG 2.1 AA accessibility audit or a client compliance requirement</div><code class="ds-cmd">python main.py --heal-a11y ./src</code><div class="ds-detail">Scans all .tsx/.jsx for: missing alt text, unlabelled inputs, icon buttons without aria-label, onClick on non-interactive elements (div/span), missing aria-live on dynamic content, broken focus traps on modals, and non-descriptive link text. Auto-patches every violation.</div></div>
+        <div class="ds"><div class="ds-when">You want to preview what would change before committing a11y fixes</div><code class="ds-cmd">python main.py --heal-a11y ./src --a11y-dry-run</code><div class="ds-detail">Prints a full diff of every proposed change without writing to disk. Review with your accessibility consultant or get stakeholder sign-off before modifying production components. Then re-run without the flag.</div></div>
+        <div class="ds"><div class="ds-when">One specific component needs an urgent a11y fix for a client demo tomorrow</div><code class="ds-cmd">python main.py --heal-a11y ./src --a11y-file src/components/Modal.tsx</code><div class="ds-detail">Scoped to a single file — faster and lower risk for production hotfixes. Modals, Drawers, Dialogs, and Comboboxes are the most common failing components in axe/Lighthouse accessibility audits.</div></div>
+        <div class="ds"><div class="ds-when">You need a new reusable UI component with tests, TypeScript types, and a barrel export</div><code class="ds-cmd">python main.py --new-component PricingTable --component-desc "3-tier pricing with monthly/annual toggle" --style-lib antd</code><div class="ds-detail">Generates 4 files: Component.tsx (ARIA-compliant), Component.test.tsx (8+ test cases covering all prop variants), Component.types.ts (full TypeScript interface), and index.ts barrel export. Uses atomic design: atom / molecule / organism / page.</div></div>
+        <div class="ds"><div class="ds-when">Your codebase has hundreds of inline style={} objects and you can't support dark mode</div><code class="ds-cmd">python main.py --refactor-styles ./src --refactor-target styled-components</code><div class="ds-detail">Walks every .tsx/.jsx, extracts inline style objects into Styled Components S.* namespace. Preserves dynamic/conditional styles (ternary expressions, template literals). Annotates every change with <code>// refactored: styled-components</code>. Safe to run incrementally per-directory.</div></div>
+        <div class="ds"><div class="ds-when">You're migrating from plain CSS or CSS Modules to AntD 6 design system tokens</div><code class="ds-cmd">python main.py --refactor-styles ./src --refactor-target antd</code><div class="ds-detail">Maps CSS properties to AntD 6 tokens where possible — spacing → Space/Flex, colour → ConfigProvider token, text → Typography component. Unmapped styles get wrapped in AntD's css utility. Preserves all existing behaviour.</div></div>
+      </div>
+
+      <!-- ── Analytics & i18n ───────────────────────────────────────── -->
+      <div class="decision-block">
+        <div class="decision-block-header dh-pink">
+          <span class="decision-emoji">&#128202;</span>
+          <div>
+            <div class="decision-block-title">Analytics &amp; Internationalisation</div>
+            <div class="decision-block-sub">Typed event tracking, multilingual support, RTL, and CMS-ready JSON</div>
+          </div>
+        </div>
+        <div class="ds"><div class="ds-when">Your app has no analytics and you need event tracking set up from scratch</div><code class="ds-cmd">python main.py --add-analytics ./src --app-name "My SaaS" --env-prefix NEXT_PUBLIC</code><div class="ds-detail">Scans your codebase for user interactions (onClick, onSubmit, route changes, feature flags) and generates a complete Amplitude SDK v2 integration: typed <code>events.ts</code>, <code>amplitude.ts</code> init file, <code>useTracking</code> hook, and barrel export — no manual event planning required.</div></div>
+        <div class="ds"><div class="ds-when">Analytics event names are inconsistent across the team (magic strings, typos, missing properties)</div><code class="ds-cmd">python main.py --add-analytics ./src --app-name "My SaaS"</code><div class="ds-detail">All events are typed as discriminated union constants in SCREAMING_SNAKE_CASE. TypeScript will error at compile time if you call <code>track()</code> with an undefined event or wrong property type — catches mistakes before they reach production data.</div></div>
+        <div class="ds"><div class="ds-when">You need to track a full conversion funnel (page views → sign-up → checkout → activation)</div><code class="ds-cmd">python main.py --add-analytics ./src --app-name "My SaaS" --env-prefix VITE</code><div class="ds-detail">The generated <code>usePageTracking</code>, <code>useFormTracking</code>, and <code>useFeatureTracking</code> hooks instrument the full user journey automatically. Drop them into your Router and form components for instant funnel data in Amplitude.</div></div>
+        <div class="ds"><div class="ds-when">You need to launch your app in multiple languages for an international market</div><code class="ds-cmd">python main.py --add-i18n ./src --locales en,es,fr,de,ja,zh --i18n-ns translation</code><div class="ds-detail">Extracts all hardcoded strings from JSX, generates JSON translation files for each locale, and wires up react-i18next v14: <code>i18n.ts</code>, TypeScript namespace (IDE autocomplete for t()), <code>useAppTranslation</code> hook, and AntD 6 LanguageSwitcher dropdown component.</div></div>
+        <div class="ds"><div class="ds-when">You want t('some.key') to cause a TypeScript error if the key is missing</div><code class="ds-cmd">python main.py --add-i18n ./src --locales en --i18n-ns ui</code><div class="ds-detail">Run English-only first to generate a fully typed <code>i18next.d.ts</code> namespace file. Once this is in place, any call to <code>t()</code> with an undefined key is a TypeScript compile error — catch missing translations at build time, not in production.</div></div>
+        <div class="ds"><div class="ds-when">Your app needs RTL (right-to-left) layout for Arabic or Hebrew markets</div><code class="ds-cmd">python main.py --add-i18n ./src --locales en,ar</code><div class="ds-detail">Arabic translation JSON includes RTL annotations. The LanguageSwitcher sets <code>dir="rtl"</code> on the document root when Arabic is selected. Your existing Flexbox / AntD Flex layout will mirror automatically with zero CSS changes.</div></div>
+        <div class="ds"><div class="ds-when">Your translations need to feed into a headless CMS or translation management platform</div><code class="ds-cmd">python main.py --add-i18n ./src --locales en,es,fr,de --i18n-ns content</code><div class="ds-detail">Output is standard i18next-format JSON — compatible with Phrase, Lokalise, Crowdin, and most headless CMSs. The generated key hierarchy (common.save, auth.sign_in, dashboard.empty_state) slots directly into most TMS platforms with no reformatting.</div></div>
+      </div>
+
+      <!-- ── MCP Agent Tools ─────────────────────────────────────────── -->
+      <div class="decision-block">
+        <div class="decision-block-header dh-mcp">
+          <span class="decision-emoji">&#128268;</span>
+          <div>
+            <div class="decision-block-title">MCP — Claude + External Tools</div>
+            <div class="decision-block-sub">Figma, Jira, GitHub, local files, databases — real-time agentic access</div>
+          </div>
+        </div>
+        <div class="ds"><div class="ds-when">You want Claude to read and reason over your local codebase without pre-indexing</div><code class="ds-cmd">python main.py --mcp filesystem --mcp-task "Find all components still using the old Button API"</code><div class="ds-detail">Claude opens and reads actual files using the filesystem MCP server. No RAG indexing step — works on-demand for any query. Useful for one-off investigations where you don't need a persistent vector store.</div></div>
+        <div class="ds"><div class="ds-when">You want Claude to query Jira and produce a smart sprint summary or risk report</div><code class="ds-cmd">python main.py --mcp jira --mcp-task "List all open P1 bugs, owner, and days open. Flag any unassigned ones."</code><div class="ds-detail">Uses <code>uvx mcp-atlassian</code>. Credentials auto-injected from JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN — the same ones already in your <code>.env</code>. Claude can run JQL searches, read issue details, comments, sprint boards, and synthesise a team-readable summary.</div></div>
+        <div class="ds"><div class="ds-when">You want Claude to audit a Figma file for design inconsistencies or extract tokens</div><code class="ds-cmd">python main.py --mcp figma --mcp-task "List all colour and typography variables. Flag any that aren't from the approved token set."</code><div class="ds-detail">Uses <code>npx -y figma-mcp</code> (official Figma MCP). FIGMA_ACCESS_TOKEN auto-injected. Claude navigates the file structure, reads component properties, variables, and dev-mode CSS — without you having to open Figma at all.</div></div>
+        <div class="ds"><div class="ds-when">You want Claude to review GitHub PR status and surface what's blocking releases</div><code class="ds-cmd">python main.py --mcp github --mcp-task "List all PRs older than 3 days — what check or reviewer is blocking each one?"</code><div class="ds-detail">Requires GITHUB_TOKEN in <code>.env</code>. Claude queries repos, pull requests, review requests, and CI check runs. Great for release managers doing standup prep or for identifying review bottlenecks at the end of a sprint.</div></div>
+        <div class="ds"><div class="ds-when">You want Claude to query a Postgres database without writing SQL</div><code class="ds-cmd">python main.py --mcp postgres --mcp-task "Show me the 10 users with the most failed login attempts in the last 7 days"</code><div class="ds-detail">Uses <code>npx -y @modelcontextprotocol/server-postgres</code> with DATABASE_URL from <code>.env</code>. Claude inspects the schema first, then constructs and runs the correct query, returning formatted results. No SQL knowledge needed.</div></div>
+        <div class="ds"><div class="ds-when">You don't know what tools a specific MCP server exposes and want to explore it</div><code class="ds-cmd">python main.py --mcp jira --mcp-list</code><div class="ds-detail">Connects to the server and pretty-prints every tool with its description and JSON Schema input parameters. No task is executed — purely exploratory. Run this first when working with an unfamiliar MCP server.</div></div>
+        <div class="ds"><div class="ds-when">You want to connect to an internal custom MCP server (SSE or Streamable HTTP)</div><code class="ds-cmd">python main.py --mcp http://internal-tools.company.com/mcp --mcp-task "List available reports"</code><div class="ds-detail">Supports any SSE or Streamable HTTP MCP server, not just the built-in presets. Transport type is auto-detected from the URL (SSE if path contains /sse, Streamable HTTP otherwise). Claude connects, discovers tools, and runs the agentic loop exactly as with presets.</div></div>
+      </div>
+
+    </div>
+  </div>
+
   <div class="section" id="workflows">
     <div class="section-header">
       <div class="section-tag">&#128214; All Workflows</div>
-      <h2>18 Agentic Commands</h2>
+      <h2>19 Agentic Commands</h2>
       <p>Click any card to expand the full under-the-hood breakdown and real-world use cases.</p>
     </div>
     <div class="search-wrap">
@@ -948,7 +1109,7 @@
     <!-- 19. MCP Agent -->
     <div class="cmd-card" data-cat="mcp" data-keywords="mcp model context protocol tools agent agentic loop stdio sse http filesystem git database browser server">
       <div class="cmd-header" onclick="toggle(this)">
-        <div class="cmd-icon" style="background:linear-gradient(135deg,#7c3aed22,#a78bfa22);color:#a78bfa">&#128268;</div>
+        <div class="cmd-icon" style="background:var(--purple-dim);color:var(--purple)">&#128268;</div>
         <div class="cmd-meta">
           <div class="cmd-title">MCP Agent — Claude + Model Context Protocol</div>
           <div class="cmd-subtitle">Connect any MCP server (stdio / SSE / HTTP) and run a full Claude agentic loop with its tools</div>
@@ -970,11 +1131,11 @@
         </div>
         <div class="cmd-section-title">&#128161; Use Cases</div>
         <div class="use-cases">
-          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Explore a codebase: list components, read files, summarise architecture</span>
-          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Query a database via MCP SQL server without writing SQL manually</span>
-          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Run Git operations (log, diff, branch) through Claude's reasoning</span>
-          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Connect to any third-party MCP server (Stripe, GitHub, Slack, Notion…)</span>
-          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Chain multiple MCP servers in a single agentic session</span>
+          <span class="uc"><span class="uc-dot" style="background:var(--purple)"></span>Explore a codebase: list components, read files, summarise architecture</span>
+          <span class="uc"><span class="uc-dot" style="background:var(--purple)"></span>Query a database via MCP SQL server without writing SQL manually</span>
+          <span class="uc"><span class="uc-dot" style="background:var(--purple)"></span>Run Git operations (log, diff, branch) through Claude's reasoning</span>
+          <span class="uc"><span class="uc-dot" style="background:var(--purple)"></span>Connect to any third-party MCP server (Stripe, GitHub, Slack, Notion…)</span>
+          <span class="uc"><span class="uc-dot" style="background:var(--purple)"></span>Chain multiple MCP servers in a single agentic session</span>
         </div>
         <div class="cmd-section-title">&#127993; Output</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
@@ -996,58 +1157,58 @@
         <table class="flags-table" style="margin-top:8px">
           <thead><tr><th>Preset</th><th>MCP Server</th><th>.env key(s) needed</th></tr></thead>
           <tr>
-            <td class="flag-name" style="color:#f472b6">figma</td>
+            <td class="flag-name" style="color:var(--pink)">figma</td>
             <td class="flag-desc"><code>npx -y figma-mcp</code> — Official Figma MCP: read files, components, variables, dev-mode inspect</td>
             <td class="flag-default"><code>FIGMA_ACCESS_TOKEN</code></td>
           </tr>
           <tr>
-            <td class="flag-name" style="color:#60a5fa">jira</td>
+            <td class="flag-name" style="color:var(--blue)">jira</td>
             <td class="flag-desc"><code>uvx mcp-atlassian</code> — Jira issues, sprints, JQL search, comments, transitions</td>
             <td class="flag-default"><code>JIRA_BASE_URL</code><br><code>JIRA_EMAIL</code><br><code>JIRA_API_TOKEN</code></td>
           </tr>
           <tr>
-            <td class="flag-name" style="color:#34d399">confluence</td>
+            <td class="flag-name" style="color:var(--green)">confluence</td>
             <td class="flag-desc"><code>uvx mcp-atlassian --confluence-only</code> — pages, spaces, search (shares Jira creds)</td>
             <td class="flag-default"><code>JIRA_BASE_URL</code><br><code>JIRA_EMAIL</code><br><code>JIRA_API_TOKEN</code></td>
           </tr>
           <tr>
-            <td class="flag-name" style="color:#818cf8">github</td>
+            <td class="flag-name" style="color:var(--accent)">github</td>
             <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-github</code> — repos, issues, PRs, code search</td>
             <td class="flag-default"><code>GITHUB_TOKEN</code></td>
           </tr>
           <tr>
-            <td class="flag-name" style="color:#fbbf24">filesystem</td>
+            <td class="flag-name" style="color:var(--yellow)">filesystem</td>
             <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-filesystem .</code> — read/write/list local files</td>
             <td class="flag-default">—</td>
           </tr>
           <tr>
-            <td class="flag-name" style="color:#2dd4bf">git</td>
+            <td class="flag-name" style="color:var(--teal)">git</td>
             <td class="flag-desc"><code>uvx mcp-server-git --repo .</code> — log, diff, blame, branch, commit</td>
             <td class="flag-default">—</td>
           </tr>
           <tr>
-            <td class="flag-name" style="color:#fb923c">slack</td>
+            <td class="flag-name" style="color:var(--orange)">slack</td>
             <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-slack</code> — channels, messages, users</td>
             <td class="flag-default"><code>SLACK_BOT_TOKEN</code><br><code>SLACK_TEAM_ID</code></td>
           </tr>
           <tr>
-            <td class="flag-name" style="color:#c084fc">postgres</td>
+            <td class="flag-name" style="color:var(--purple)">postgres</td>
             <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-postgres</code> — query, schema inspect, tables</td>
             <td class="flag-default"><code>DATABASE_URL</code></td>
           </tr>
           <tr>
-            <td class="flag-name" style="color:#f87171">search</td>
+            <td class="flag-name" style="color:var(--red)">search</td>
             <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-brave-search</code> — web + local search</td>
             <td class="flag-default"><code>BRAVE_API_KEY</code></td>
           </tr>
         </table>
 
-        <div style="margin-top:14px;padding:12px 16px;background:var(--bg-code);border-radius:8px;border-left:3px solid #a78bfa;font-size:.82rem;color:var(--muted)">
-          <strong style="color:#a78bfa">&#128161; Preset examples</strong><br>
-          <code style="color:#f472b6">python main.py --mcp figma --mcp-task "List all components in the Design System file"</code><br>
-          <code style="color:#60a5fa">python main.py --mcp jira --mcp-task "Find all open bugs in the PROJ project"</code><br>
-          <code style="color:#34d399">python main.py --mcp github --mcp-task "Summarise open PRs and who is blocking review"</code><br>
-          <code style="color:#818cf8">python main.py --mcp-presets</code> &nbsp;— print full preset table
+        <div style="margin-top:14px;padding:12px 16px;background:var(--bg-code);border-radius:8px;border-left:3px solid var(--purple);font-size:.82rem;color:var(--muted)">
+          <strong style="color:var(--purple)">&#128161; Preset examples</strong><br>
+          <code style="color:var(--pink)">python main.py --mcp figma --mcp-task "List all components in the Design System file"</code><br>
+          <code style="color:var(--blue)">python main.py --mcp jira --mcp-task "Find all open bugs in the PROJ project"</code><br>
+          <code style="color:var(--green)">python main.py --mcp github --mcp-task "Summarise open PRs and who is blocking review"</code><br>
+          <code style="color:var(--accent)">python main.py --mcp-presets</code> &nbsp;— print full preset table
         </div>
       </div>
     </div>
@@ -1087,8 +1248,8 @@
           <tr><td class="ref-cmd">--add-i18n ./src --locales en,es,fr,de,ja,zh</td><td class="ref-desc">Extract strings + generate react-i18next v14 for 6 locales</td><td><span class="ref-cat" style="background:var(--green-dim);color:var(--green)">i18n</span></td></tr>
           <tr><td class="ref-cmd">--jira PROJ-123</td><td class="ref-desc">Fetch + preview Jira ticket context only</td><td><span class="ref-cat" style="background:var(--accent-dim);color:var(--accent)">Workflow</span></td></tr>
           <tr><td class="ref-cmd">--figma https://figma.com/file/&#8230;</td><td class="ref-desc">Fetch + preview Figma component tree + screenshot</td><td><span class="ref-cat" style="background:var(--accent-dim);color:var(--accent)">Workflow</span></td></tr>
-          <tr><td class="ref-cmd">--mcp 'npx -y @modelcontextprotocol/server-filesystem .' --mcp-task "list components"</td><td class="ref-desc">Run Claude agentic loop with MCP tools (stdio/SSE/HTTP)</td><td><span class="ref-cat" style="background:#1e1b2e;color:#a78bfa">MCP</span></td></tr>
-          <tr><td class="ref-cmd">--mcp 'http://localhost:8080/sse' --mcp-list</td><td class="ref-desc">Discover all tools exposed by an MCP server</td><td><span class="ref-cat" style="background:#1e1b2e;color:#a78bfa">MCP</span></td></tr>
+          <tr><td class="ref-cmd">--mcp 'npx -y @modelcontextprotocol/server-filesystem .' --mcp-task "list components"</td><td class="ref-desc">Run Claude agentic loop with MCP tools (stdio/SSE/HTTP)</td><td><span class="ref-cat" style="background:var(--purple-dim);color:var(--purple)">MCP</span></td></tr>
+          <tr><td class="ref-cmd">--mcp 'http://localhost:8080/sse' --mcp-list</td><td class="ref-desc">Discover all tools exposed by an MCP server</td><td><span class="ref-cat" style="background:var(--purple-dim);color:var(--purple)">MCP</span></td></tr>
         </tbody>
       </table>
     </div>
