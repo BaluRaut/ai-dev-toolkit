@@ -276,6 +276,7 @@
         <button class="active" onclick="switchTab(this,'tab-install')">Setup</button>
         <button onclick="switchTab(this,'tab-env')">Environment</button>
         <button onclick="switchTab(this,'tab-run')">First Run</button>
+        <button onclick="switchTab(this,'tab-alias')">&#128640; Alias</button>
       </div>
       <div class="install-code active" id="tab-install">
         <span class="cmt"># 1. Clone the repository</span><br>
@@ -299,14 +300,32 @@
         <span class="env">NEXT_PUBLIC_AMPLITUDE_API_KEY</span>=your_amplitude_key
       </div>
       <div class="install-code" id="tab-run">
-        <span class="cmt"># Interactive menu (recommended for first-time users)</span><br>
-        python main.py<br><br>
+        <span class="cmt"># After setting up the alias (see &#128640; Alias tab), use aidev from anywhere:</span><br>
+        aidev<br><br>
         <span class="cmt"># Full workflow: Jira + Figma + Swagger to Code</span><br>
-        python main.py <span class="kw">--jira</span> PROJ-123 <span class="kw">--figma</span> https://figma.com/file/abc <span class="kw">--swagger</span> ./api.json<br><br>
+        aidev <span class="kw">--jira</span> PROJ-123 <span class="kw">--figma</span> https://figma.com/file/abc <span class="kw">--swagger</span> ./api.json<br><br>
         <span class="cmt"># Review a file</span><br>
-        python main.py <span class="kw">--review</span> src/components/UserCard.tsx<br><br>
+        aidev <span class="kw">--review</span> src/components/UserCard.tsx<br><br>
         <span class="cmt"># Show all session costs</span><br>
-        python main.py <span class="kw">--costs</span>
+        aidev <span class="kw">--costs</span><br><br>
+        <span class="cmt"># Without the alias, use python main.py directly from claude-agent/</span><br>
+        python main.py <span class="kw">--interactive</span>
+      </div>
+      <div class="install-code" id="tab-alias">
+        <span class="cmt"># Add this alias to your shell config — run once, works forever</span><br><br>
+        <span class="cmt"># For zsh (macOS default)</span><br>
+        <span class="kw">echo</span> <span class="str">'alias aidev="(cd ~/path/to/ai-dev-toolkit/claude-agent &amp;&amp; source ../.venv/bin/activate &amp;&amp; python main.py)"'</span> &gt;&gt; ~/.zshrc<br>
+        <span class="kw">source</span> ~/.zshrc<br><br>
+        <span class="cmt"># For bash</span><br>
+        <span class="kw">echo</span> <span class="str">'alias aidev="(cd ~/path/to/ai-dev-toolkit/claude-agent &amp;&amp; source ../.venv/bin/activate &amp;&amp; python main.py)"'</span> &gt;&gt; ~/.bashrc<br>
+        <span class="kw">source</span> ~/.bashrc<br><br>
+        <span class="cmt"># Verify it's registered</span><br>
+        <span class="kw">type</span> aidev<br><br>
+        <span class="cmt"># Now use aidev from ANY directory — no cd needed!</span><br>
+        aidev <span class="kw">--jira</span> PROJ-123<br>
+        aidev <span class="kw">--review</span> src/components/Button.tsx<br>
+        aidev <span class="kw">--mcp</span> figma <span class="kw">--mcp-task</span> <span class="str">"Extract design tokens"</span><br>
+        aidev <span class="kw">--costs</span>
       </div>
     </div>
   </div>

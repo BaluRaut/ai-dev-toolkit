@@ -65,9 +65,34 @@ cp .env.example .env
 
 ### 3. Run
 ```bash
-python main.py                # Interactive menu with 13 options
+python main.py                # Interactive menu
 python main.py --interactive  # Step-by-step guided mode
 ```
+
+### 4. ⚡ Set up the `aidev` alias (recommended)
+
+So you never have to type `python main.py` again — run this **once**:
+
+```bash
+# zsh (macOS default)
+echo 'alias aidev="(cd /path/to/ai-dev-toolkit/claude-agent && source ../.venv/bin/activate && python main.py)"' >> ~/.zshrc
+source ~/.zshrc
+
+# bash
+echo 'alias aidev="(cd /path/to/ai-dev-toolkit/claude-agent && source ../.venv/bin/activate && python main.py)"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Now from **any directory** in your terminal:
+
+```bash
+aidev --jira PROJ-123 --figma https://figma.com/file/abc
+aidev --review src/components/CheckoutForm.tsx
+aidev --mcp figma --mcp-task "Extract design tokens"
+aidev --costs
+```
+
+> The alias runs in a subshell `( )` so your current working directory is never changed.
 
 ---
 
@@ -75,18 +100,20 @@ python main.py --interactive  # Step-by-step guided mode
 
 | Mode | Command | Description |
 |------|---------|-------------|
-| 🚀 **Generate Feature** | `--jira PROJ-123 --figma <url> --swagger <url>` | Full feature from Jira + Figma + API → Code + Tests |
-| 🖊️ **Interactive** | `--interactive` | Paste context manually, step by step |
-| 🔍 **Code Review** | `--review src/file.tsx` | AI reviews for bugs, security, performance |
-| 🧪 **Unit Tests** | `--unit-test src/file.ts` | Generate Jest + RTL tests with MSW mocking |
-| 🎭 **E2E Tests** | `--e2e src/components/` | Generate Playwright E2E tests (Page Object Model) |
-| 🐛 **Bug Fix** | `--fix "error message"` | AI debugs and fixes errors |
-| 🔄 **Self-Heal** | `--heal ./project --heal-framework jest` | Run tests → auto-fix failures → repeat |
-| ⚙️ **CI/CD** | `--ci` | Generate GitHub Actions workflows |
-| 📚 **Index** | `--index ./src` | Index codebase into ChromaDB vectors |
-| 🔍 **RAG Search** | `--index ./src --search "auth logic"` | Semantic search across codebase |
-| 💰 **Costs** | `--costs` | Show session token usage and costs |
-| ⏭️ **No Tests** | `--jira PROJ-123 --no-tests` | Generate feature without tests |
+| 🚀 **Generate Feature** | `aidev --jira PROJ-123 --figma <url> --swagger <url>` | Full feature from Jira + Figma + API → Code + Tests |
+| 🖊️ **Interactive** | `aidev --interactive` | Paste context manually, step by step |
+| 🔍 **Code Review** | `aidev --review src/file.tsx` | AI reviews for bugs, security, performance |
+| 🧪 **Unit Tests** | `aidev --unit-test src/file.ts` | Generate Jest + RTL tests with MSW mocking |
+| 🎭 **E2E Tests** | `aidev --e2e src/components/` | Generate Playwright E2E tests (Page Object Model) |
+| 🐛 **Bug Fix** | `aidev --fix "error message"` | AI debugs and fixes errors |
+| 🔄 **Self-Heal** | `aidev --heal ./project --heal-framework jest` | Run tests → auto-fix failures → repeat |
+| ⚙️ **CI/CD** | `aidev --ci` | Generate GitHub Actions workflows |
+| 📚 **Index** | `aidev --index ./src` | Index codebase into ChromaDB vectors |
+| 🔍 **RAG Search** | `aidev --index ./src --search "auth logic"` | Semantic search across codebase |
+| 💰 **Costs** | `aidev --costs` | Show session token usage and costs |
+| ⏭️ **No Tests** | `aidev --jira PROJ-123 --no-tests` | Generate feature without tests |
+
+> **Tip:** All commands above use the `aidev` alias. Without it, prefix every command with `python main.py` from the `claude-agent/` directory.
 
 ---
 
@@ -120,13 +147,13 @@ The agent doesn't just generate code — it **verifies its own work**:
 
 ```bash
 # Self-heal a project using Jest
-python main.py --heal ./my-react-app --heal-framework jest
+aidev --heal ./my-react-app --heal-framework jest
 
 # Self-heal with Playwright
-python main.py --heal ./my-app --heal-framework playwright --heal-retries 5
+aidev --heal ./my-app --heal-framework playwright --heal-retries 5
 
 # Self-heal Python tests
-python main.py --heal ./my-api --heal-framework pytest
+aidev --heal ./my-api --heal-framework pytest
 ```
 
 ---
@@ -136,7 +163,7 @@ python main.py --heal ./my-api --heal-framework pytest
 Auto-generate production-ready workflows:
 
 ```bash
-python main.py --ci
+aidev --ci
 ```
 
 Generates 3 workflow files:
@@ -160,7 +187,7 @@ Every Claude API call is tracked automatically:
 
 ```bash
 # View detailed session summary
-python main.py --costs
+aidev --costs
 ```
 
 Shows a full breakdown: per-call costs, total session cost, cost by mode, token counts.
@@ -173,10 +200,10 @@ For large projects, index your codebase so the agent finds context automatically
 
 ```bash
 # Step 1: Index your codebase
-python main.py --index ./src
+aidev --index ./src
 
 # Step 2: Search semantically
-python main.py --index ./src --search "user authentication middleware"
+aidev --index ./src --search "user authentication middleware"
 
 # The agent finds the most relevant code and can use it as context for Claude
 ```

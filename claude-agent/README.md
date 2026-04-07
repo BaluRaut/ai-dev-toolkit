@@ -28,18 +28,39 @@ python main.py --jira PROJ-123 --figma "https://www.figma.com/file/abc123/MyDesi
 # Only Jira + API Docs
 python main.py --jira PROJ-123 --swagger "https://api.example.com/swagger.json"
 
-# Only Jira ticket
-python main.py --jira PROJ-123
-
-# Use local swagger file
-python main.py --jira PROJ-123 --swagger ./docs/swagger.json
-
-# Custom output directory
-python main.py --jira PROJ-123 --output ./src/features/users
-
 # Interactive mode (paste context manually)
 python main.py --interactive
 ```
+
+### 4. ⚡ Set up the `aidev` alias — never type `python main.py` again
+
+Run **once** in your terminal:
+
+```bash
+# zsh (macOS default)
+echo 'alias aidev="(cd $(pwd) && source ../.venv/bin/activate && python main.py)"' >> ~/.zshrc
+source ~/.zshrc
+
+# bash
+echo 'alias aidev="(cd $(pwd) && source ../.venv/bin/activate && python main.py)"' >> ~/.bashrc
+source ~/.bashrc
+
+# Verify
+type aidev
+```
+
+Now from **any directory**:
+
+```bash
+aidev --jira PROJ-123 --figma "https://www.figma.com/file/abc123" --swagger "https://api.example.com/swagger.json"
+aidev --review src/components/UserCard.tsx
+aidev --fix "TypeError: Cannot read property of undefined"
+aidev --heal ./ --heal-framework jest
+aidev --mcp figma --mcp-task "Extract all design tokens"
+aidev --costs
+```
+
+> The alias wraps the command in `( )` so your working directory never changes.
 
 ## 📁 Project Structure
 ```
