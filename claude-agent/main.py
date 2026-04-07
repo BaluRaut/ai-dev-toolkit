@@ -40,6 +40,8 @@ from templates.prompt_template import (
     build_full_feature_prompt,
     build_code_review_prompt,
     build_test_generation_prompt,
+    build_unit_test_prompt,
+    build_playwright_e2e_prompt,
     build_refactor_prompt,
     build_bug_fix_prompt,
 )
@@ -72,11 +74,15 @@ BANNER = """
 @click.option("--api-filter", help="Filter API endpoints by path (e.g., /users)")
 @click.option("--interactive", "-i", is_flag=True, help="Interactive mode")
 @click.option("--review", "-r", help="Code review a file")
-@click.option("--test", "-t", help="Generate tests for a file")
+@click.option("--test", "-t", help="Generate unit tests for a file")
+@click.option("--e2e", help="Generate Playwright E2E tests for a file or folder")
+@click.option("--unit-test", "unit_test", help="Generate comprehensive unit tests for a file")
 @click.option("--fix", help="Fix a bug (paste error message)")
 @click.option("--stack", help="Override tech stack (e.g., 'Vue 3, TypeScript, Pinia')")
+@click.option("--no-tests", is_flag=True, help="Skip test generation in full workflow")
+@click.option("--base-url", default="http://localhost:3000", help="Base URL for E2E tests")
 @click.pass_context
-def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, fix, stack):
+def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url):
     """🤖 Claude AI Agent — Generate production code from Jira + Figma + API Docs."""
     console.print(BANNER)
 
@@ -96,12 +102,16 @@ def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test
         run_interactive_mode(stack)
     elif review:
         run_code_review(review)
+    elif e2e:
+        run_playwright_e2e_generation(e2e, base_url)
+    elif unit_test:
+        run_unit_test_generation(unit_test)
     elif test:
         run_test_generation(test)
     elif fix:
         run_bug_fix(fix)
     elif jira or figma or swagger:
-        run_full_workflow(jira, figma, swagger, output, api_filter, stack)
+        run_full_workflow(jira, figma, swagger, output, api_filter, stack, include_tests=not no_tests)
     else:
         # No arguments — show help + quick menu
         show_quick_menu()
@@ -118,8 +128,9 @@ def run_full_workflow(
     output_dir: str | None,
     api_filter: str | None,
     tech_stack: str | None,
+    include_tests: bool = True,
 ):
-    """Main workflow: Fetch all context → Send to Claude → Save generated code."""
+    """Main workflow: Fetch all context → Send to Claude → Save generated code + tests."""
 
     console.print(Panel("[bold]📋 Step 1/4: Gathering Context[/bold]", style="cyan"))
 
@@ -206,7 +217,15 @@ def run_full_workflow(
         figma_context=figma_context or "(No Figma design provided)",
         api_context=api_context or "(No API docs provided)",
         tech_stack=stack,
+        include_unit_tests=include_tests,
+        include_e2e_tests=include_tests,
     )
+
+    if include_tests:
+        console.print("[dim]   🧪 Unit tests: ENABLED[/dim]")
+        console.print("[dim]   🎭 Playwright E2E tests: ENABLED[/dim]")
+    else:
+        console.print("[dim]   ⏭️  Tests: SKIPPED (use without --no-tests to include)[/dim]")
 
     console.print(f"[dim]   Total prompt size: {len(prompt)} characters[/dim]")
 
@@ -345,6 +364,109 @@ def run_test_generation(file_path: str):
 
 
 # ─────────────────────────────────────────────────
+# Playwright E2E Test Generation Mode
+# ─────────────────────────────────────────────────
+
+def run_playwright_e2e_generation(source_path: str, base_url: str = "http://localhost:3000"):
+    """Generate Playwright E2E tests for a file or folder."""
+    console.print(Panel(f"[bold]🎭 Playwright E2E Test Generation: {source_path}[/bold]", style="cyan"))
+
+    path = Path(source_path)
+    if not path.exists():
+        console.print(f"[red]❌ Path not found: {source_path}[/red]")
+        return
+
+    # Collect source code — single file or folder
+    source_files = {}
+    if path.is_file():
+        source_files[path.name] = path.read_text()
+    else:
+        for ext in ("*.tsx", "*.ts", "*.jsx", "*.js", "*.vue", "*.py"):
+            for f in path.rglob(ext):
+                if "node_modules" not in str(f) and "__pycache__" not in str(f):
+                    try:
+                        source_files[str(f.relative_to(path))] = f.read_text()
+                    except Exception:
+                        pass
+
+    if not source_files:
+        console.print("[red]❌ No source files found.[/red]")
+        return
+
+    console.print(f"[dim]   Found {len(source_files)} source files[/dim]")
+
+    combined_source = ""
+    for name, content in source_files.items():
+        combined_source += f"\n\n// ===FILE: {name}===\n{content}\n// ===END FILE==="
+
+    app_description = Prompt.ask(
+        "Briefly describe the app/feature to test",
+        default="Web application with standard CRUD features",
+    )
+
+    prompt = build_playwright_e2e_prompt(
+        source_code=combined_source,
+        app_description=app_description,
+        base_url=base_url,
+    )
+
+    console.print(f"[dim]   Prompt size: {len(prompt)} chars | Base URL: {base_url}[/dim]")
+
+    agent = ClaudeAgent()
+    files = agent.generate_code(prompt)
+
+    if files:
+        generator = CodeGenerator()
+        generator.preview_files(files)
+        if Confirm.ask("\nSave E2E test files?", default=True):
+            output_dir = Prompt.ask("Output directory", default=Config.OUTPUT_DIR)
+            generator = CodeGenerator(output_dir=output_dir)
+            saved = generator.save_files(files)
+            console.print(f"\n[bold green]🎭 {len(saved)} Playwright E2E test files generated![/bold green]")
+    else:
+        console.print("[red]❌ No E2E test files generated.[/red]")
+
+
+# ─────────────────────────────────────────────────
+# Unit Test Generation Mode (enhanced)
+# ─────────────────────────────────────────────────
+
+def run_unit_test_generation(file_path: str):
+    """Generate comprehensive unit tests (Jest + RTL) for a file."""
+    console.print(Panel(f"[bold]🧪 Unit Test Generation: {file_path}[/bold]", style="cyan"))
+
+    path = Path(file_path)
+    if not path.exists():
+        console.print(f"[red]❌ File not found: {file_path}[/red]")
+        return
+
+    code = path.read_text()
+    framework = Prompt.ask("Test framework", default="Jest + React Testing Library")
+
+    prompt = build_unit_test_prompt(
+        source_code=code,
+        file_name=path.name,
+        test_framework=framework,
+    )
+
+    console.print(f"[dim]   Framework: {framework} | Prompt size: {len(prompt)} chars[/dim]")
+
+    agent = ClaudeAgent()
+    files = agent.generate_code(prompt)
+
+    if files:
+        generator = CodeGenerator()
+        generator.preview_files(files)
+        if Confirm.ask("\nSave unit test files?", default=True):
+            output_dir = Prompt.ask("Output directory", default=Config.OUTPUT_DIR)
+            generator = CodeGenerator(output_dir=output_dir)
+            saved = generator.save_files(files)
+            console.print(f"\n[bold green]🧪 {len(saved)} unit test files generated![/bold green]")
+    else:
+        console.print("[red]❌ No unit test files generated.[/red]")
+
+
+# ─────────────────────────────────────────────────
 # Bug Fix Mode
 # ─────────────────────────────────────────────────
 
@@ -377,13 +499,14 @@ def show_quick_menu():
     console.print(Panel("[bold]What would you like to do?[/bold]", style="cyan"))
 
     options = {
-        "1": ("🚀 Generate feature (Jira + Figma + API → Code)", "interactive"),
+        "1": ("🚀 Generate feature (Jira + Figma + API → Code + Tests)", "interactive"),
         "2": ("🔍 Review code", "review"),
-        "3": ("🧪 Generate tests", "test"),
-        "4": ("🐛 Fix a bug", "fix"),
-        "5": ("📋 Fetch Jira ticket only", "jira"),
-        "6": ("🎨 Fetch Figma design only", "figma"),
-        "7": ("🔌 Parse API docs only", "api"),
+        "3": ("🧪 Generate unit tests", "test"),
+        "4": ("🎭 Generate Playwright E2E tests", "e2e"),
+        "5": ("🐛 Fix a bug", "fix"),
+        "6": ("📋 Fetch Jira ticket only", "jira"),
+        "7": ("🎨 Fetch Figma design only", "figma"),
+        "8": ("🔌 Parse API docs only", "api"),
     }
 
     for key, (label, _) in options.items():
@@ -398,8 +521,12 @@ def show_quick_menu():
         file_path = Prompt.ask("File to review")
         run_code_review(file_path)
     elif mode == "test":
-        file_path = Prompt.ask("File to generate tests for")
-        run_test_generation(file_path)
+        file_path = Prompt.ask("File to generate unit tests for")
+        run_unit_test_generation(file_path)
+    elif mode == "e2e":
+        source = Prompt.ask("File or folder to generate E2E tests for")
+        base_url = Prompt.ask("Base URL", default="http://localhost:3000")
+        run_playwright_e2e_generation(source, base_url)
     elif mode == "fix":
         error = Prompt.ask("Paste error message or file path")
         run_bug_fix(error)
