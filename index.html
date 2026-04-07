@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Development Toolkit</title>
+    <meta name="description" content="Complete toolkit for teams to use AI across the entire software development lifecycle — from Jira ticket to production code.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a2e;
+            --border: #2a2a3e;
+            --text: #e4e4e7;
+            --text-muted: #a1a1aa;
+            --accent: #818cf8;
+            --accent-glow: rgba(129, 140, 248, 0.15);
+            --green: #34d399;
+            --yellow: #fbbf24;
+            --pink: #f472b6;
+            --blue: #60a5fa;
+            --orange: #fb923c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated background gradient */
+        .bg-gradient {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(129,140,248,0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(244,114,182,0.05) 0%, transparent 50%);
+            animation: bgShift 20s ease-in-out infinite alternate;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes bgShift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-5%, -5%); }
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Nav */
+        nav {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon { font-size: 1.5rem; }
+
+        .nav-links { display: flex; gap: 24px; }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--accent); }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: var(--accent-glow);
+            border: 1px solid rgba(129,140,248,0.3);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff 0%, #818cf8 50%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 640px;
+            margin: 0 auto 36px;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(129,140,248,0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Flow diagram */
+        .flow {
+            padding: 40px 0 60px;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .flow-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-width: 100px;
+            transition: all 0.2s;
+        }
+
+        .flow-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .flow-icon { font-size: 1.8rem; }
+        .flow-label { font-size: 0.85rem; font-weight: 600; }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* Section titles */
+        .section-title {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .section-title h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        /* Cards grid */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 0 0 80px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 20px var(--accent-glow);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+
+        .card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .card-tag {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tag-guide { background: rgba(52,211,153,0.15); color: var(--green); }
+        .tag-tool { background: rgba(129,140,248,0.15); color: var(--accent); }
+        .tag-python { background: rgba(251,191,36,0.15); color: var(--yellow); }
+
+        /* Features */
+        .features {
+            padding: 80px 0;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 32px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .feature:hover { border-color: var(--accent); }
+
+        .feature-icon { font-size: 2.5rem; margin-bottom: 16px; }
+        .feature h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+        .feature p { color: var(--text-muted); font-size: 0.85rem; }
+
+        /* CLI Section */
+        .cli-section {
+            padding: 60px 0 80px;
+        }
+
+        .cli-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .cli-header {
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cli-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .cli-dot.red { background: #ff5f57; }
+        .cli-dot.yellow { background: #febc2e; }
+        .cli-dot.green { background: #28c840; }
+
+        .cli-title {
+            margin-left: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .cli-body {
+            padding: 24px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .cli-comment { color: #6b7280; }
+        .cli-cmd { color: var(--green); }
+        .cli-flag { color: var(--accent); }
+        .cli-string { color: var(--yellow); }
+
+        /* Time savings */
+        .savings {
+            padding: 80px 0;
+        }
+
+        .savings-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .savings-table th, .savings-table td {
+            padding: 16px 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .savings-table th {
+            background: rgba(255,255,255,0.03);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .savings-table td {
+            font-size: 0.95rem;
+        }
+
+        .savings-table tr:last-child td { border-bottom: none; }
+        .savings-table tr:hover td { background: rgba(129,140,248,0.05); }
+
+        .time-manual { color: var(--text-muted); }
+        .time-ai { color: var(--green); font-weight: 700; }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .nav-links { display: none; }
+            .hero { padding: 60px 0 40px; }
+            .flow-diagram { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+            .cta-group { flex-direction: column; align-items: center; }
+            .savings-table { font-size: 0.85rem; }
+            .savings-table th, .savings-table td { padding: 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <div class="container">
+        <!-- Nav -->
+        <nav>
+            <div class="logo">
+                <span class="logo-icon">🤖</span>
+                <span>AI Dev Toolkit</span>
+            </div>
+            <div class="nav-links">
+                <a href="#guides">Guides</a>
+                <a href="#tool">Claude Agent</a>
+                <a href="#savings">Time Savings</a>
+                <a href="https://github.com/BaluRaut/ai-dev-toolkit" target="_blank">GitHub ↗</a>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="badge">✨ Open Source — Free for Teams</div>
+            <h1>AI-Powered<br>Development Toolkit</h1>
+            <p>
+                Complete guides + Python tools to use AI across your entire development 
+                workflow — from Jira ticket to production code. No manual coding needed.
+            </p>
+            <div class="cta-group">
+                <a href="https://github.com/BaluRaut/ai-dev-toolkit" class="btn btn-primary" target="_blank">
+                    ⭐ Star on GitHub
+                </a>
+                <a href="https://github.com/BaluRaut/ai-dev-toolkit#-quick-start" class="btn btn-secondary" target="_blank">
+                    🚀 Quick Start
+                </a>
+            </div>
+        </section>
+
+        <!-- Flow Diagram -->
+        <section class="flow">
+            <div class="flow-diagram">
+                <div class="flow-item">
+                    <span class="flow-icon">📋</span>
+                    <span class="flow-label">Jira Ticket</span>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <span class="flow-icon">🎨</span>
+                    <span class="flow-label">Figma Design</span>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <span class="flow-icon">🔌</span>
+                    <span class="flow-label">API Docs</span>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item" style="border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow);">
+                    <span class="flow-icon">🤖</span>
+                    <span class="flow-label">Claude Agent</span>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <span class="flow-icon">✅</span>
+                    <span class="flow-label">Working Code</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guides -->
+        <section id="guides">
+            <div class="section-title">
+                <h2>📚 Guides & Playbooks</h2>
+                <p>Everything your team needs to go AI-first</p>
+            </div>
+            <div class="cards">
+                <a href="https://github.com/BaluRaut/ai-dev-toolkit/blob/main/AI_WORKFLOW_PLAYBOOK.md" class="card" target="_blank">
+                    <span class="card-icon">📋</span>
+                    <h3>AI Workflow Playbook</h3>
+                    <p>Complete guide to using AI across Jira → Figma → API Docs → Code → Tests. Includes team training plan.</p>
+                    <span class="card-tag tag-guide">Guide</span>
+                </a>
+                <a href="https://github.com/BaluRaut/ai-dev-toolkit/blob/main/AI_AGENTS_GUIDE.md" class="card" target="_blank">
+                    <span class="card-icon">🤖</span>
+                    <h3>AI Agents Comparison</h3>
+                    <p>Compare all AI agents: GitHub Copilot, Cursor, Devin, Claude, v0.dev, Bolt.new, and more.</p>
+                    <span class="card-tag tag-guide">Guide</span>
+                </a>
+                <a href="https://github.com/BaluRaut/ai-dev-toolkit/blob/main/AGENTIC_AI_GUIDE.md" class="card" target="_blank">
+                    <span class="card-icon">🧠</span>
+                    <h3>Agentic AI Deep Dive</h3>
+                    <p>What is agentic AI? How does it work? Where to use it? Time savings comparison.</p>
+                    <span class="card-tag tag-guide">Guide</span>
+                </a>
+                <a href="https://github.com/BaluRaut/ai-dev-toolkit/blob/main/CONNECT_FIGMA_JIRA_API_TO_AI.md" class="card" target="_blank">
+                    <span class="card-icon">🔗</span>
+                    <h3>Connect Figma + Jira + API</h3>
+                    <p>Practical step-by-step guide to feed Figma screenshots, Jira tickets, and API docs into AI.</p>
+                    <span class="card-tag tag-tool">Practical</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Claude Agent Tool -->
+        <section id="tool" class="features">
+            <div class="section-title">
+                <h2>🐍 Claude Agent — Python Tool</h2>
+                <p>Auto-fetch from Jira, Figma, Swagger → Generate code with Claude</p>
+            </div>
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">📋</div>
+                    <h3>Jira Connector</h3>
+                    <p>Auto-fetch ticket details, ACs, comments via REST API</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Figma Connector</h3>
+                    <p>Fetch design data, components, colors, fonts + screenshots</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔌</div>
+                    <h3>Swagger Parser</h3>
+                    <p>Parse OpenAPI 2.0/3.0 specs from URLs or local files</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Claude Agent</h3>
+                    <p>Streams to Claude API, parses generated code into files</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💾</div>
+                    <h3>Code Generator</h3>
+                    <p>Auto-saves generated code to your project structure</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🧪</div>
+                    <h3>5 Modes</h3>
+                    <p>Feature gen, interactive, code review, tests, bug fix</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CLI Demo -->
+        <section class="cli-section">
+            <div class="section-title">
+                <h2>⚡ Usage</h2>
+                <p>One command to generate entire features</p>
+            </div>
+            <div class="cli-box">
+                <div class="cli-header">
+                    <span class="cli-dot red"></span>
+                    <span class="cli-dot yellow"></span>
+                    <span class="cli-dot green"></span>
+                    <span class="cli-title">Terminal — zsh</span>
+                </div>
+                <div class="cli-body">
+                    <span class="cli-comment"># Full workflow: Jira + Figma + API → Code</span><br>
+                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--jira</span> <span class="cli-string">PROJ-123</span> <span class="cli-flag">--figma</span> <span class="cli-string">"https://figma.com/file/..."</span> <span class="cli-flag">--swagger</span> <span class="cli-string">"https://api.com/swagger.json"</span>
+                    <br><br>
+                    <span class="cli-comment"># Interactive mode — paste context step by step</span><br>
+                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--interactive</span>
+                    <br><br>
+                    <span class="cli-comment"># Code review</span><br>
+                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--review</span> <span class="cli-string">src/components/Profile.tsx</span>
+                    <br><br>
+                    <span class="cli-comment"># Generate tests</span><br>
+                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--test</span> <span class="cli-string">src/services/userService.ts</span>
+                    <br><br>
+                    <span class="cli-comment"># Fix a bug</span><br>
+                    <span class="cli-cmd">python</span> main.py <span class="cli-flag">--fix</span> <span class="cli-string">"TypeError: Cannot read property 'map' of undefined"</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Time Savings -->
+        <section id="savings" class="savings">
+            <div class="section-title">
+                <h2>⏱️ Time Savings</h2>
+                <p>What used to take days now takes minutes</p>
+            </div>
+            <table class="savings-table">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Manual</th>
+                        <th>With AI Agent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>📋 Jira Epic → Stories</td>
+                        <td class="time-manual">3 hours</td>
+                        <td class="time-ai">5 min</td>
+                    </tr>
+                    <tr>
+                        <td>🎨 Figma → React Component</td>
+                        <td class="time-manual">6 hours</td>
+                        <td class="time-ai">20 min</td>
+                    </tr>
+                    <tr>
+                        <td>🔌 API Integration</td>
+                        <td class="time-manual">1 day</td>
+                        <td class="time-ai">30 min</td>
+                    </tr>
+                    <tr>
+                        <td>🚀 Full CRUD Feature</td>
+                        <td class="time-manual">3 days</td>
+                        <td class="time-ai">2-3 hours</td>
+                    </tr>
+                    <tr>
+                        <td>🧪 Test Suite</td>
+                        <td class="time-manual">1 day</td>
+                        <td class="time-ai">30 min</td>
+                    </tr>
+                    <tr>
+                        <td>🐛 Bug Investigation + Fix</td>
+                        <td class="time-manual">2 hours</td>
+                        <td class="time-ai">10 min</td>
+                    </tr>
+                    <tr>
+                        <td><strong>📦 Typical Full Feature</strong></td>
+                        <td class="time-manual"><strong>~1 week</strong></td>
+                        <td class="time-ai"><strong>~4-6 hours</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>
+                Built with AI, for teams using AI 🤖 &nbsp;|&nbsp;
+                <a href="https://github.com/BaluRaut/ai-dev-toolkit">GitHub</a> &nbsp;|&nbsp;
+                MIT License &nbsp;|&nbsp;
+                Made by <a href="https://github.com/BaluRaut">Balasaheb Raut</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
