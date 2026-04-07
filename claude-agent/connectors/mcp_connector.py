@@ -25,10 +25,16 @@ Usage:
 
     # Pretty-print tools
     connector.print_tools(tools, "filesystem")
+
+    # Use a named preset (pulls credentials from Config/.env automatically)
+    config = build_preset("figma")    # uses FIGMA_ACCESS_TOKEN
+    config = build_preset("jira")     # uses JIRA_BASE_URL + JIRA_EMAIL + JIRA_API_TOKEN
+    config = build_preset("github")   # uses GITHUB_TOKEN
 """
 
 import asyncio
 import json
+import os
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import Any
@@ -255,29 +261,211 @@ class MCPConnector:
 # Helpers
 # ─────────────────────────────────────────────────
 
+# ─────────────────────────────────────────────────
+# Known MCP server presets
+# ─────────────────────────────────────────────────
+
+# Each entry: (command, args_template, env_vars_needed, description)
+# env_vars_needed: list of (env_key, description) pairs — values are
+# pulled from os.environ at build time so they come from .env via Config.
+
+_PRESET_REGISTRY: dict[str, dict] = {
+    # ── Figma ──────────────────────────────────────────────────────────────
+    "figma": {
+        "command": "npx",
+        "args": ["-y", "figma-mcp"],
+        "env_keys": {"FIGMA_API_KEY": "FIGMA_ACCESS_TOKEN"},  # map preset key → .env key
+        "description": "Official Figma MCP — read files, components, variables, dev-mode inspect",
+        "install": "npx -y figma-mcp  (requires FIGMA_ACCESS_TOKEN in .env)",
+        "docs": "https://github.com/figma/mcp",
+    },
+    # ── Jira / Atlassian ───────────────────────────────────────────────────
+    "jira": {
+        "command": "uvx",
+        "args": ["mcp-atlassian"],
+        "env_keys": {
+            "JIRA_URL": "JIRA_BASE_URL",
+            "JIRA_USERNAME": "JIRA_EMAIL",
+            "JIRA_API_TOKEN": "JIRA_API_TOKEN",
+        },
+        "description": "mcp-atlassian — Jira issues, projects, sprints, search (JQL)",
+        "install": "uvx mcp-atlassian  (requires JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN in .env)",
+        "docs": "https://github.com/sooperset/mcp-atlassian",
+    },
+    # ── Confluence (same package as Jira) ──────────────────────────────────
+    "confluence": {
+        "command": "uvx",
+        "args": ["mcp-atlassian", "--confluence-only"],
+        "env_keys": {
+            "CONFLUENCE_URL": "JIRA_BASE_URL",
+            "CONFLUENCE_USERNAME": "JIRA_EMAIL",
+            "CONFLUENCE_API_TOKEN": "JIRA_API_TOKEN",
+        },
+        "description": "mcp-atlassian (Confluence only) — pages, spaces, search",
+        "install": "uvx mcp-atlassian  (shares Atlassian credentials with jira preset)",
+        "docs": "https://github.com/sooperset/mcp-atlassian",
+    },
+    # ── GitHub ─────────────────────────────────────────────────────────────
+    "github": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env_keys": {"GITHUB_PERSONAL_ACCESS_TOKEN": "GITHUB_TOKEN"},
+        "description": "Official GitHub MCP — repos, issues, PRs, code search",
+        "install": "npx -y @modelcontextprotocol/server-github  (requires GITHUB_TOKEN in .env)",
+        "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+    },
+    # ── Filesystem (local files) ───────────────────────────────────────────
+    "filesystem": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+        "env_keys": {},
+        "description": "Official filesystem MCP — read/write/list local files",
+        "install": "npx -y @modelcontextprotocol/server-filesystem .",
+        "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+    },
+    # ── Git ────────────────────────────────────────────────────────────────
+    "git": {
+        "command": "uvx",
+        "args": ["mcp-server-git", "--repo", "."],
+        "env_keys": {},
+        "description": "Official Git MCP — log, diff, blame, branch, commit",
+        "install": "uvx mcp-server-git --repo .",
+        "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+    },
+    # ── Slack ──────────────────────────────────────────────────────────────
+    "slack": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-slack"],
+        "env_keys": {
+            "SLACK_BOT_TOKEN": "SLACK_BOT_TOKEN",
+            "SLACK_TEAM_ID": "SLACK_TEAM_ID",
+        },
+        "description": "Official Slack MCP — channels, messages, users",
+        "install": "npx -y @modelcontextprotocol/server-slack  (requires SLACK_BOT_TOKEN, SLACK_TEAM_ID)",
+        "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/slack",
+    },
+    # ── Postgres ───────────────────────────────────────────────────────────
+    "postgres": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"],
+        "env_keys": {"DATABASE_URL": "DATABASE_URL"},
+        "description": "Official Postgres MCP — query, schema inspect, tables",
+        "install": "npx -y @modelcontextprotocol/server-postgres  (requires DATABASE_URL in .env)",
+        "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+        "_url_arg": True,  # DATABASE_URL is interpolated into args
+    },
+    # ── Brave Search ──────────────────────────────────────────────────────
+    "search": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+        "env_keys": {"BRAVE_API_KEY": "BRAVE_API_KEY"},
+        "description": "Official Brave Search MCP — web + local search",
+        "install": "npx -y @modelcontextprotocol/server-brave-search  (requires BRAVE_API_KEY)",
+        "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search",
+    },
+}
+
+
+def build_preset(preset_name: str, extra_env: dict[str, str] | None = None) -> MCPServerConfig:
+    """
+    Build an MCPServerConfig from a named preset.
+
+    Credentials are automatically pulled from environment variables
+    (already loaded from .env by Config).  Pass extra_env to override
+    individual values.
+
+    Args:
+        preset_name:  One of: figma, jira, confluence, github,
+                      filesystem, git, slack, postgres, search
+        extra_env:    Optional overrides for env vars.
+
+    Returns:
+        MCPServerConfig ready to pass to MCPConnector or run_mcp_agent.
+
+    Raises:
+        ValueError: if the preset name is not recognised.
+    """
+    key = preset_name.lower().strip()
+    if key not in _PRESET_REGISTRY:
+        available = ", ".join(sorted(_PRESET_REGISTRY))
+        raise ValueError(
+            f"Unknown MCP preset '{preset_name}'. "
+            f"Available: {available}\n"
+            f"Or pass a full server string: 'npx -y ...' / 'http://...'"
+        )
+
+    entry = _PRESET_REGISTRY[key]
+
+    # Build env dict: map preset env key → value from os.environ (sourced from .env)
+    env: dict[str, str] = {}
+    for preset_key, env_key in entry["env_keys"].items():
+        value = (extra_env or {}).get(preset_key) or os.environ.get(env_key, "")
+        if value:
+            env[preset_key] = value
+
+    # Interpolate ${DATABASE_URL} style placeholders in args
+    args = [
+        os.environ.get(a.lstrip("${}").rstrip("}"), a) if a.startswith("${") else a
+        for a in entry["args"]
+    ]
+
+    return MCPServerConfig(
+        name=key,
+        type="stdio",
+        command=entry["command"],
+        args=args,
+        env=env,
+    )
+
+
+def list_presets() -> None:
+    """Pretty-print all available MCP presets to the console."""
+    table = Table(title="🔌 Built-in MCP Server Presets", show_lines=True)
+    table.add_column("Name", style="cyan", no_wrap=True)
+    table.add_column("Description", style="white")
+    table.add_column("Install / Command", style="dim")
+    for name, entry in _PRESET_REGISTRY.items():
+        table.add_row(name, entry["description"], entry["install"])
+    console.print(table)
+
+
 def parse_server_string(server_str: str, name: str = "server") -> MCPServerConfig:
     """
-    Parse a compact server string into an MCPServerConfig.
+    Parse a compact server string (or named preset) into an MCPServerConfig.
 
-    Examples
-    --------
-    stdio:
-        "npx -y @modelcontextprotocol/server-filesystem ."
-        "uvx mcp-server-git --repo ."
-        "python -m my_mcp_server"
+    Named presets (auto-inject credentials from .env):
+        "figma"       → npx -y figma-mcp          (FIGMA_ACCESS_TOKEN)
+        "jira"        → uvx mcp-atlassian           (JIRA_* vars)
+        "confluence"  → uvx mcp-atlassian           (JIRA_* vars)
+        "github"      → npx -y ...server-github     (GITHUB_TOKEN)
+        "filesystem"  → npx -y ...server-filesystem .
+        "git"         → uvx mcp-server-git --repo .
+        "slack"       → npx -y ...server-slack      (SLACK_* vars)
+        "postgres"    → npx -y ...server-postgres   (DATABASE_URL)
+        "search"      → npx -y ...server-brave-search (BRAVE_API_KEY)
 
-    SSE (HTTP):
-        "http://localhost:8080/sse"
-        "https://my-mcp.example.com/sse"
-
-    Streamable HTTP:
-        "http://localhost:8080/mcp"
+    Explicit strings:
+        stdio:  "npx -y @modelcontextprotocol/server-filesystem ."
+                "uvx mcp-server-git --repo ."
+                "python -m my_mcp_server"
+        SSE:    "http://localhost:8080/sse"
+        HTTP:   "http://localhost:8080/mcp"
     """
     s = server_str.strip()
+
+    # ── Named preset ──────────────────────────────────────────────────────
+    if s.lower() in _PRESET_REGISTRY:
+        cfg = build_preset(s.lower())
+        if name != "server":          # caller supplied an explicit name override
+            cfg.name = name
+        return cfg
+
+    # ── HTTP / SSE URL ────────────────────────────────────────────────────
     if s.startswith(("http://", "https://")):
         transport = "sse" if ("/sse" in s) else "http"
         return MCPServerConfig(name=name, type=transport, url=s)
-    # Treat as stdio command
+
+    # ── Stdio command string ──────────────────────────────────────────────
     parts = s.split()
     if not parts:
         raise ValueError("Empty MCP server string")

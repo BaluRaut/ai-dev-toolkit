@@ -44,7 +44,7 @@ from agent.frontend_agent import run_a11y_heal, run_component_generate, run_styl
 from agent.amplitude_agent import run_amplitude_agent
 from agent.i18n_agent import run_i18n_agent, SUPPORTED_LOCALES
 from agent.mcp_agent import run_mcp_agent
-from connectors.mcp_connector import MCPConnector, parse_server_string
+from connectors.mcp_connector import MCPConnector, parse_server_string, list_presets
 from templates.prompt_template import (
     build_full_feature_prompt,
     build_code_review_prompt,
@@ -114,12 +114,13 @@ BANNER = """
 @click.option("--locales", "locales", default="en,es,fr,de", help="Comma-separated locale codes e.g. en,es,fr,de,ja")
 @click.option("--i18n-ns", "i18n_ns", default="translation", help="i18next namespace (default: translation)")
 # ── MCP flags ──────────────────────────────────────────────────────────────
-@click.option("--mcp", "mcp_server", help="MCP server to connect to. Stdio: 'npx -y @modelcontextprotocol/server-filesystem .' or SSE: 'http://localhost:8080/sse'")
+@click.option("--mcp", "mcp_server", help="MCP server: named preset (figma|jira|github|filesystem|git|slack|postgres|search) OR stdio command OR http/sse URL")
 @click.option("--mcp-task", "mcp_task", help="Task for the MCP agentic loop (use with --mcp)")
 @click.option("--mcp-list", "mcp_list", is_flag=True, help="List all tools exposed by the MCP server (use with --mcp)")
 @click.option("--mcp-name", "mcp_name", default="server", help="Friendly name for the MCP server (default: server)")
+@click.option("--mcp-presets", "mcp_presets", is_flag=True, help="List all built-in MCP server presets (figma, jira, github, …)")
 @click.pass_context
-def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url, heal, heal_framework, heal_retries, generate_ci, index_path, search_query, costs, heal_a11y, a11y_file, a11y_dry_run, new_component, component_desc, component_type, style_lib, refactor_styles, refactor_target, add_analytics, app_name, env_prefix, add_i18n, locales, i18n_ns, mcp_server, mcp_task, mcp_list, mcp_name):
+def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url, heal, heal_framework, heal_retries, generate_ci, index_path, search_query, costs, heal_a11y, a11y_file, a11y_dry_run, new_component, component_desc, component_type, style_lib, refactor_styles, refactor_target, add_analytics, app_name, env_prefix, add_i18n, locales, i18n_ns, mcp_server, mcp_task, mcp_list, mcp_name, mcp_presets):
     """🤖 Claude AI Agent — Generate production code from Jira + Figma + API Docs."""
     console.print(BANNER)
 
@@ -169,6 +170,8 @@ def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test
     elif add_i18n:
         run_add_i18n_mode(add_i18n, locales, i18n_ns, output)
     # ── MCP route ──────────────────────────────────────────────────────────
+    elif mcp_presets:
+        list_presets()
     elif mcp_server and mcp_list:
         run_mcp_list_mode(mcp_server, mcp_name)
     elif mcp_server:

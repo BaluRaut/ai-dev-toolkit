@@ -984,16 +984,70 @@
         </div>
         <table class="flags-table">
           <thead><tr><th>Flag</th><th>Description</th><th>Default</th></tr></thead>
-          <tr><td class="flag-name">--mcp</td><td class="flag-desc">MCP server — stdio command or HTTP/SSE URL</td><td class="flag-default">—</td></tr>
+          <tr><td class="flag-name">--mcp</td><td class="flag-desc">Named preset (figma, jira, github…) <em>or</em> stdio command <em>or</em> HTTP/SSE URL</td><td class="flag-default">—</td></tr>
           <tr><td class="flag-name">--mcp-task</td><td class="flag-desc">Natural-language task for the agentic loop</td><td class="flag-default">prompted</td></tr>
           <tr><td class="flag-name">--mcp-list</td><td class="flag-desc">List all tools (and resources) without running a task</td><td class="flag-default">off</td></tr>
           <tr><td class="flag-name">--mcp-name</td><td class="flag-desc">Friendly label for the server (used as tool prefix)</td><td class="flag-default">server</td></tr>
+          <tr><td class="flag-name">--mcp-presets</td><td class="flag-desc">Print the built-in preset table (figma, jira, github, git, filesystem, slack, postgres, search)</td><td class="flag-default">off</td></tr>
         </table>
+
+        <!-- Preset table -->
+        <div class="cmd-section-title" style="margin-top:20px">&#128268; Built-in Presets — one word, credentials from <code style="font-size:.78rem">.env</code></div>
+        <table class="flags-table" style="margin-top:8px">
+          <thead><tr><th>Preset</th><th>MCP Server</th><th>.env key(s) needed</th></tr></thead>
+          <tr>
+            <td class="flag-name" style="color:#f472b6">figma</td>
+            <td class="flag-desc"><code>npx -y figma-mcp</code> — Official Figma MCP: read files, components, variables, dev-mode inspect</td>
+            <td class="flag-default"><code>FIGMA_ACCESS_TOKEN</code></td>
+          </tr>
+          <tr>
+            <td class="flag-name" style="color:#60a5fa">jira</td>
+            <td class="flag-desc"><code>uvx mcp-atlassian</code> — Jira issues, sprints, JQL search, comments, transitions</td>
+            <td class="flag-default"><code>JIRA_BASE_URL</code><br><code>JIRA_EMAIL</code><br><code>JIRA_API_TOKEN</code></td>
+          </tr>
+          <tr>
+            <td class="flag-name" style="color:#34d399">confluence</td>
+            <td class="flag-desc"><code>uvx mcp-atlassian --confluence-only</code> — pages, spaces, search (shares Jira creds)</td>
+            <td class="flag-default"><code>JIRA_BASE_URL</code><br><code>JIRA_EMAIL</code><br><code>JIRA_API_TOKEN</code></td>
+          </tr>
+          <tr>
+            <td class="flag-name" style="color:#818cf8">github</td>
+            <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-github</code> — repos, issues, PRs, code search</td>
+            <td class="flag-default"><code>GITHUB_TOKEN</code></td>
+          </tr>
+          <tr>
+            <td class="flag-name" style="color:#fbbf24">filesystem</td>
+            <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-filesystem .</code> — read/write/list local files</td>
+            <td class="flag-default">—</td>
+          </tr>
+          <tr>
+            <td class="flag-name" style="color:#2dd4bf">git</td>
+            <td class="flag-desc"><code>uvx mcp-server-git --repo .</code> — log, diff, blame, branch, commit</td>
+            <td class="flag-default">—</td>
+          </tr>
+          <tr>
+            <td class="flag-name" style="color:#fb923c">slack</td>
+            <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-slack</code> — channels, messages, users</td>
+            <td class="flag-default"><code>SLACK_BOT_TOKEN</code><br><code>SLACK_TEAM_ID</code></td>
+          </tr>
+          <tr>
+            <td class="flag-name" style="color:#c084fc">postgres</td>
+            <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-postgres</code> — query, schema inspect, tables</td>
+            <td class="flag-default"><code>DATABASE_URL</code></td>
+          </tr>
+          <tr>
+            <td class="flag-name" style="color:#f87171">search</td>
+            <td class="flag-desc"><code>npx -y @modelcontextprotocol/server-brave-search</code> — web + local search</td>
+            <td class="flag-default"><code>BRAVE_API_KEY</code></td>
+          </tr>
+        </table>
+
         <div style="margin-top:14px;padding:12px 16px;background:var(--bg-code);border-radius:8px;border-left:3px solid #a78bfa;font-size:.82rem;color:var(--muted)">
-          <strong style="color:#a78bfa">&#128276; Quick Start</strong><br>
-          Install popular MCP servers: <code style="color:var(--accent)">npx -y @modelcontextprotocol/server-filesystem .</code> (files) &nbsp;|&nbsp;
-          <code style="color:var(--accent)">uvx mcp-server-git</code> (Git) &nbsp;|&nbsp;
-          <code style="color:var(--accent)">npx -y @modelcontextprotocol/server-github</code> (GitHub)
+          <strong style="color:#a78bfa">&#128161; Preset examples</strong><br>
+          <code style="color:#f472b6">python main.py --mcp figma --mcp-task "List all components in the Design System file"</code><br>
+          <code style="color:#60a5fa">python main.py --mcp jira --mcp-task "Find all open bugs in the PROJ project"</code><br>
+          <code style="color:#34d399">python main.py --mcp github --mcp-task "Summarise open PRs and who is blocking review"</code><br>
+          <code style="color:#818cf8">python main.py --mcp-presets</code> &nbsp;— print full preset table
         </div>
       </div>
     </div>
