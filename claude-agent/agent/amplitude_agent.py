@@ -61,9 +61,38 @@ def _build_amplitude_prompt(
     app_name: str,
     analytics_dir: str,
     env_var_prefix: str,
+    rules_text: str = "",
+    existing_analytics: dict | None = None,
 ) -> str:
+    rules_block = f"{rules_text}\n" if rules_text else ""
+
+    # Build existing analytics context
+    existing_block = ""
+    if existing_analytics:
+        lib = existing_analytics.get("lib", "")
+        sample = existing_analytics.get("sample_code", "")
+        sample_file = existing_analytics.get("sample_file", "")
+        existing_block = f"""
+## ⚠️ EXISTING ANALYTICS SETUP DETECTED
+Library: {lib}
+{f'File: {sample_file}' if sample_file else ''}
+{f'''Existing analytics code (REUSE this pattern):
+```typescript
+{sample}
+```''' if sample else ''}
+
+**Rules for extending existing analytics:**
+- Do NOT generate a new amplitude.ts init file if one already exists
+- Do NOT create a new event catalog from scratch — EXTEND the existing one
+- Match the existing naming convention for events (e.g., SCREAMING_SNAKE vs camelCase)
+- Reuse existing track()/identify() wrapper signatures
+- Only add NEW events inferred from the scanned components
+- Import from the EXISTING analytics path, not a new one
+"""
+
     return f"""\
-You are a senior frontend engineer specialising in product analytics and Amplitude SDK v2 (Browser SDK) integration.
+{rules_block}You are a senior frontend engineer specialising in product analytics and Amplitude SDK v2 (Browser SDK) integration.
+{existing_block}
 
 ## Application
 Name: {app_name}
@@ -206,15 +235,19 @@ class AmplitudeAgent:
         output_dir: str = ".",
         analytics_dir: str = "src/analytics",
         env_prefix: str = "NEXT_PUBLIC",
+        rules_text: str = "",
+        existing_analytics: dict | None = None,
     ) -> None:
         """
         Generate the full Amplitude integration.
 
         Args:
-            app_name:      Human-readable application name (used in comments / docs)
-            output_dir:    Root directory where generated files will be saved
-            analytics_dir: Relative path for analytics files (default: src/analytics)
-            env_prefix:    Env var prefix: NEXT_PUBLIC (Next.js) or VITE (Vite)
+            app_name:            Human-readable application name
+            output_dir:          Root directory where generated files will be saved
+            analytics_dir:       Relative path for analytics files
+            env_prefix:          Env var prefix: NEXT_PUBLIC (Next.js) or VITE (Vite)
+            rules_text:          Project rules block to prepend to prompt
+            existing_analytics:  Auto-detected existing analytics setup info
         """
         console.print(Panel(
             f"[bold]📊 Amplitude Analytics Agent[/bold]\n"
@@ -233,6 +266,8 @@ class AmplitudeAgent:
             app_name=app_name,
             analytics_dir=analytics_dir,
             env_var_prefix=env_prefix,
+            rules_text=rules_text,
+            existing_analytics=existing_analytics,
         )
 
         files = self.agent.generate_code(prompt)
@@ -280,6 +315,8 @@ def run_amplitude_agent(
     output_dir: str = ".",
     analytics_dir: str = "src/analytics",
     env_prefix: str = "NEXT_PUBLIC",
+    rules_text: str = "",
+    existing_analytics: dict | None = None,
 ) -> None:
     """Entry point for --add-analytics CLI flag."""
     agent = AmplitudeAgent(project_dir)
@@ -288,4 +325,6 @@ def run_amplitude_agent(
         output_dir=output_dir,
         analytics_dir=analytics_dir,
         env_prefix=env_prefix,
+        rules_text=rules_text,
+        existing_analytics=existing_analytics,
     )

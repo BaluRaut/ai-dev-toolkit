@@ -95,6 +95,10 @@ class DetectedConfig:
     has_src_folder: bool = False
     existing_test_sample: str = ""
     existing_component_sample: str = ""
+    # ── Existing integration detection ───────────────────────────────────
+    existing_analytics: dict = field(default_factory=dict)   # {lib, sample_code, event_names}
+    existing_i18n: dict = field(default_factory=dict)         # {lib, has_t_calls, namespace, locales}
+    detected_style_lib: str = ""                              # "styled-components" | "antd" | "css-modules" | "tailwind" | ""
 
 
 @dataclass
@@ -237,6 +241,92 @@ def _detect_project_configs(project_root: str) -> DetectedConfig:
                     detected.existing_component_sample = _read_first_lines(str(f), 60)
                     break
             if detected.existing_component_sample:
+                break
+
+    # ── Existing analytics detection ─────────────────────────────────────
+    all_deps = set(detected.package_json.get("dependencies", [])) | set(detected.package_json.get("devDependencies", []))
+    analytics_info: dict = {}
+    if "@amplitude/analytics-browser" in all_deps:
+        analytics_info["lib"] = "amplitude"
+    elif "mixpanel-browser" in all_deps:
+        analytics_info["lib"] = "mixpanel"
+    elif "@segment/analytics-next" in all_deps:
+        analytics_info["lib"] = "segment"
+    elif "react-ga4" in all_deps or "@google-analytics/data" in all_deps:
+        analytics_info["lib"] = "google-analytics"
+
+    if analytics_info:
+        # Find existing analytics code sample
+        analytics_dirs = [
+            root / "src" / "analytics", root / "src" / "lib" / "analytics",
+            root / "src" / "utils" / "analytics", root / "src" / "tracking",
+        ]
+        for ad in analytics_dirs:
+            if ad.is_dir():
+                for f in sorted(ad.iterdir()):
+                    if f.suffix in (".ts", ".tsx", ".js"):
+                        sample = _read_first_lines(str(f), 80)
+                        if sample:
+                            analytics_info["sample_code"] = sample
+                            analytics_info["sample_file"] = str(f.relative_to(root))
+                            break
+                if analytics_info.get("sample_code"):
+                    break
+        detected.existing_analytics = analytics_info
+
+    # ── Existing i18n detection ──────────────────────────────────────────
+    i18n_info: dict = {}
+    if "react-i18next" in all_deps or "i18next" in all_deps:
+        i18n_info["lib"] = "react-i18next"
+    elif "next-intl" in all_deps:
+        i18n_info["lib"] = "next-intl"
+    elif "react-intl" in all_deps or "@formatjs/intl" in all_deps:
+        i18n_info["lib"] = "react-intl"
+
+    if i18n_info:
+        # Check for existing locale files
+        locale_dirs = [root / "public" / "locales", root / "src" / "locales", root / "locales"]
+        for ld in locale_dirs:
+            if ld.is_dir():
+                locales = [d.name for d in ld.iterdir() if d.is_dir() and len(d.name) <= 5]
+                if locales:
+                    i18n_info["locales"] = locales
+                    i18n_info["locale_dir"] = str(ld.relative_to(root))
+                    # Read the primary locale file to detect namespace + existing keys
+                    en_dir = ld / "en"
+                    if en_dir.is_dir():
+                        for f in sorted(en_dir.iterdir()):
+                            if f.suffix == ".json":
+                                i18n_info["namespace"] = f.stem
+                                sample = _read_first_lines(str(f), 40)
+                                if sample:
+                                    i18n_info["existing_keys_sample"] = sample
+                                break
+                break
+        # Check if components already use t() calls
+        for ext in ("*.tsx", "*.jsx"):
+            for f in (root / "src").rglob(ext) if (root / "src").is_dir() else []:
+                try:
+                    code = f.read_text(encoding="utf-8", errors="ignore")[:2000]
+                    if "useTranslation" in code or 't("' in code or "t('" in code:
+                        i18n_info["has_t_calls"] = True
+                        break
+                except Exception:
+                    pass
+        detected.existing_i18n = i18n_info
+
+    # ── Existing style library detection ─────────────────────────────────
+    if "styled-components" in all_deps:
+        detected.detected_style_lib = "styled-components"
+    elif "antd" in all_deps and "styled-components" not in all_deps:
+        detected.detected_style_lib = "antd"
+    elif "tailwindcss" in all_deps:
+        detected.detected_style_lib = "tailwind"
+    else:
+        # Check for CSS modules usage
+        for ext in ("*.module.css", "*.module.scss"):
+            if any((root / "src").rglob(ext)) if (root / "src").is_dir() else False:
+                detected.detected_style_lib = "css-modules"
                 break
 
     return detected
@@ -472,6 +562,20 @@ def build_rules_prompt(rules: ProjectRules) -> str:
         deps = det.package_json["dependencies"]
         detected_lines.append(f"- **Installed packages:** {', '.join(deps[:20])}")
 
+    if det.detected_style_lib:
+        detected_lines.append(f"- **Style library in use:** {det.detected_style_lib} — MATCH THIS, do not introduce a different one")
+
+    if det.existing_analytics:
+        lib = det.existing_analytics.get("lib", "unknown")
+        detected_lines.append(f"- **Existing analytics:** {lib} — REUSE the existing setup, do not create a new one from scratch")
+
+    if det.existing_i18n:
+        lib = det.existing_i18n.get("lib", "unknown")
+        locales = det.existing_i18n.get("locales", [])
+        detected_lines.append(f"- **Existing i18n:** {lib} — project already uses t() calls, EXTEND don't replace")
+        if locales:
+            detected_lines.append(f"- **Existing locales:** {', '.join(locales)}")
+
     if detected_lines:
         sections.append("## Auto-Detected Project Config\n" + "\n".join(detected_lines))
 
@@ -485,6 +589,19 @@ def build_rules_prompt(rules: ProjectRules) -> str:
         sections.append(
             "## Existing Component Pattern — MATCH THIS STYLE\n"
             f"```typescript\n{det.existing_component_sample.strip()}\n```"
+        )
+
+    if det.existing_analytics.get("sample_code"):
+        sections.append(
+            f"## Existing Analytics Pattern ({det.existing_analytics.get('lib', 'unknown')}) — REUSE THIS\n"
+            f"File: `{det.existing_analytics.get('sample_file', '')}`\n"
+            f"```typescript\n{det.existing_analytics['sample_code'].strip()}\n```"
+        )
+
+    if det.existing_i18n.get("existing_keys_sample"):
+        sections.append(
+            f"## Existing i18n Keys ({det.existing_i18n.get('lib', 'unknown')}) — EXTEND THIS\n"
+            f"```json\n{det.existing_i18n['existing_keys_sample'].strip()}\n```"
         )
 
     return "\n\n".join(sections) + "\n\n---\n\n"

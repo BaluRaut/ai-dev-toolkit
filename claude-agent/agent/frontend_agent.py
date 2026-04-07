@@ -221,8 +221,10 @@ def _build_component_prompt(
     description: str,
     style_lib: StyleLib,
     props_hint: str,
+    rules_text: str = "",
 ) -> str:
     """Build the Claude prompt for generating a full component matrix."""
+    rules_block = f"{rules_text}\n" if rules_text else ""
 
     style_guide = {
         "styled-components": """\
@@ -243,7 +245,7 @@ Use Ant Design 6:
     }[style_lib]
 
     return f"""\
-You are a senior React 18 / TypeScript 5 frontend engineer.
+{rules_block}You are a senior React 18 / TypeScript 5 frontend engineer.
 
 ## Component to Build
 Name        : {component_name}
@@ -306,6 +308,7 @@ class ComponentMatrixGenerator:
         component_type: str = "molecule",
         props_hint: str = "",
         output_dir: str = ".",
+        rules_text: str = "",
     ) -> None:
         console.print(Panel(
             f"[bold]🧩 Component Matrix Generator[/bold]\n"
@@ -322,6 +325,7 @@ class ComponentMatrixGenerator:
             description=description,
             style_lib=style_lib,
             props_hint=props_hint,
+            rules_text=rules_text,
         )
 
         files = self.agent.generate_code(prompt)
@@ -345,7 +349,9 @@ class ComponentMatrixGenerator:
 # 3. Style Refactor Agent
 # ═══════════════════════════════════════════════════════════════
 
-def _build_refactor_prompt(file_path: str, code: str, target: StyleLib) -> str:
+def _build_refactor_prompt(file_path: str, code: str, target: StyleLib, rules_text: str = "") -> str:
+    rules_block = f"{rules_text}\n" if rules_text else ""
+
     target_guidance = {
         "styled-components": """\
 Migrate ALL inline `style={{...}}` objects and any plain className CSS references to
@@ -363,7 +369,7 @@ Migrate ALL inline `style={{...}}` objects to equivalent Ant Design 6 component 
     }[target]
 
     return f"""\
-You are a senior React/TypeScript engineer specialising in UI library migrations.
+{rules_block}You are a senior React/TypeScript engineer specialising in UI library migrations.
 
 ## File to Refactor
 Path: {file_path}
@@ -395,10 +401,11 @@ class StyleRefactorAgent:
     to either Styled-Components v6 or Ant Design 6.
     """
 
-    def __init__(self, project_dir: str, target: StyleLib = "styled-components"):
+    def __init__(self, project_dir: str, target: StyleLib = "styled-components", rules_text: str = ""):
         self.project_dir = Path(project_dir)
         self.target = target
         self.agent = ClaudeAgent()
+        self.rules_text = rules_text
 
     @staticmethod
     def _has_inline_styles(code: str) -> bool:
@@ -449,7 +456,7 @@ class StyleRefactorAgent:
         for i, path in enumerate(paths, 1):
             console.print(f"\n  [dim]({i}/{len(paths)}) Refactoring:[/dim] {path.name}")
             code = path.read_text(encoding="utf-8", errors="ignore")
-            prompt = _build_refactor_prompt(str(path), code, self.target)
+            prompt = _build_refactor_prompt(str(path), code, self.target, rules_text=self.rules_text)
             files = self.agent.generate_code(prompt)
             if files:
                 refactored.extend(files)
@@ -492,6 +499,7 @@ def run_component_generate(
     component_type: str = "molecule",
     output_dir: str = ".",
     props_hint: str = "",
+    rules_text: str = "",
 ) -> None:
     """Entry point for --new-component CLI flag."""
     gen = ComponentMatrixGenerator()
@@ -502,6 +510,7 @@ def run_component_generate(
         component_type=component_type,
         output_dir=output_dir,
         props_hint=props_hint,
+        rules_text=rules_text,
     )
 
 
@@ -510,7 +519,8 @@ def run_style_refactor(
     target: str = "styled-components",
     file: str | None = None,
     output_dir: str | None = None,
+    rules_text: str = "",
 ) -> None:
     """Entry point for --refactor-styles CLI flag."""
-    agent = StyleRefactorAgent(project_dir, target=target)  # type: ignore[arg-type]
+    agent = StyleRefactorAgent(project_dir, target=target, rules_text=rules_text)  # type: ignore[arg-type]
     agent.run(target_file=file, output_dir=output_dir)

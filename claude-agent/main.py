@@ -745,6 +745,16 @@ def run_new_component_mode(
     props_hint = Prompt.ask("  Any specific props / variants? (or press Enter to skip)", default="")
     out = output_dir or Prompt.ask("  Output directory", default=".")
 
+    # Load project rules and auto-detect style lib
+    rules = load_rules(out)
+    rules_text = build_rules_prompt(rules)
+    # Override style_lib if project already uses one
+    if rules.detected.detected_style_lib and rules.detected.detected_style_lib in ("styled-components", "antd"):
+        detected_lib = rules.detected.detected_style_lib
+        if detected_lib != style_lib:
+            console.print(f"  [yellow]⚠️  Detected existing style library: {detected_lib} — using it instead of {style_lib}[/yellow]")
+            style_lib = detected_lib
+
     run_component_generate(
         component_name=component_name,
         description=description,
@@ -752,6 +762,7 @@ def run_new_component_mode(
         component_type=component_type,
         output_dir=out,
         props_hint=props_hint,
+        rules_text=rules_text,
     )
 
 
@@ -774,7 +785,18 @@ def run_refactor_styles_mode(
         "  Target a specific file? (or press Enter to scan whole project)",
         default="",
     ) or None
-    run_style_refactor(project_dir, target=target_lib, file=single_file, output_dir=output_dir)
+
+    # Load project rules
+    rules = load_rules(project_dir)
+    rules_text = build_rules_prompt(rules)
+    # Override target lib if project already uses one
+    if rules.detected.detected_style_lib and rules.detected.detected_style_lib in ("styled-components", "antd"):
+        detected_lib = rules.detected.detected_style_lib
+        if detected_lib != target_lib:
+            console.print(f"  [yellow]⚠️  Detected existing style library: {detected_lib} — migrating to it[/yellow]")
+            target_lib = detected_lib
+
+    run_style_refactor(project_dir, target=target_lib, file=single_file, output_dir=output_dir, rules_text=rules_text)
 
 
 # ─────────────────────────────────────────────────
@@ -803,12 +825,21 @@ def run_add_analytics_mode(
     analytics_dir = Prompt.ask("  Analytics output directory", default="src/analytics")
     out = output_dir or Prompt.ask("  Root output directory", default=".")
 
+    # Load project rules and detect existing analytics
+    rules = load_rules(project_dir)
+    rules_text = build_rules_prompt(rules)
+    existing_analytics = rules.detected.existing_analytics
+    if existing_analytics:
+        console.print(f"  [yellow]⚠️  Detected existing {existing_analytics.get('lib', '')} analytics setup — will extend, not replace[/yellow]")
+
     run_amplitude_agent(
         project_dir=project_dir,
         app_name=app_name,
         output_dir=out,
         analytics_dir=analytics_dir,
         env_prefix=env_prefix,
+        rules_text=rules_text,
+        existing_analytics=existing_analytics or None,
     )
 
 
@@ -844,11 +875,22 @@ def run_add_i18n_mode(
     ns = Prompt.ask("  i18next namespace", default=namespace)
     out = output_dir or Prompt.ask("  Root output directory", default=".")
 
+    # Load project rules and detect existing i18n
+    rules = load_rules(project_dir)
+    rules_text = build_rules_prompt(rules)
+    existing_i18n = rules.detected.existing_i18n
+    if existing_i18n:
+        console.print(f"  [yellow]⚠️  Detected existing {existing_i18n.get('lib', '')} i18n setup — will wrap new strings with t() and generate pending_keys.json[/yellow]")
+        if existing_i18n.get("locales"):
+            console.print(f"  [dim]   Existing locales: {', '.join(existing_i18n['locales'])}[/dim]")
+
     run_i18n_agent(
         project_dir=project_dir,
         locales=locales,
         output_dir=out,
         namespace=ns,
+        rules_text=rules_text,
+        existing_i18n=existing_i18n or None,
     )
 
 

@@ -116,6 +116,8 @@ def _build_i18n_prompt(
     target_locales: list[str],
     namespace: str,
     default_locale: str,
+    rules_text: str = "",
+    existing_i18n: dict | None = None,
 ) -> str:
     locale_lines = "\n".join(
         f"  - {code} : {SUPPORTED_LOCALES.get(code, {}).get('name', code)}"
@@ -123,8 +125,33 @@ def _build_i18n_prompt(
         for code in target_locales
     )
 
+    rules_block = f"{rules_text}\n" if rules_text else ""
+
+    # Build existing i18n context
+    existing_block = ""
+    if existing_i18n:
+        lib = existing_i18n.get("lib", "")
+        has_t = existing_i18n.get("has_t_calls", False)
+        sample = existing_i18n.get("existing_keys_sample", "")
+        existing_block = f"""
+## ⚠️ EXISTING i18n SETUP DETECTED
+Library: {lib}
+Some components already use t() calls: {has_t}
+{f'''Existing translation keys (EXTEND these, do NOT overwrite):
+```json
+{sample}
+```''' if sample else ''}
+
+**Rules for extending existing i18n:**
+- Do NOT generate a new i18n.ts setup file if one already exists
+- Do NOT regenerate keys that are already translated
+- ONLY generate NEW keys found in the scanned components
+- Match the existing key naming convention exactly
+"""
+
     return f"""\
-You are a senior i18n engineer specialising in react-i18next v14 and multilingual React/Next.js applications.
+{rules_block}You are a senior i18n engineer specialising in react-i18next v14 and multilingual React/Next.js applications.
+{existing_block}
 
 ## Scanned Component Files
 {file_scan}
@@ -152,6 +179,33 @@ common.save / common.cancel / common.loading / common.error
 auth.sign_in / auth.sign_in_subtitle / auth.email_placeholder
 dashboard.title / dashboard.empty_state / dashboard.table.column_name
 form.required_field / form.invalid_email / form.submit
+```
+
+### Step 3 — Generate Translation Files
+
+### Step 4 — Wrap Components with t()
+For EVERY scanned component file that has hardcoded strings:
+- Replace each hardcoded string with `t('namespace.key')` or `{{t('namespace.key')}}`
+- Add `import {{ useTranslation }} from 'react-i18next'` (or the project's existing hook)
+- Add `const {{ t }} = useTranslation('{namespace}')` at the top of the component
+- For interpolated strings use: `t('key', {{ name: variableName }})`
+- Output each refactored component file using ===FILE: <original_path>=== markers
+
+### Step 5 — Generate pending_keys.json
+Generate a file `pending_keys.json` that lists ALL newly extracted keys with their
+default (English) values. This is the team's review queue for translators:
+```json
+{{
+  "_meta": {{
+    "generated_by": "aidev --add-i18n",
+    "total_keys": <count>,
+    "status": "pending_review"
+  }},
+  "keys": [
+    {{ "key": "auth.sign_in", "default": "Sign In", "file": "src/components/Login.tsx", "line": 42 }},
+    {{ "key": "dashboard.title", "default": "Dashboard", "file": "src/pages/Dashboard.tsx", "line": 15 }}
+  ]
+}}
 ```
 
 ### Step 3 — Generate Files
@@ -262,6 +316,8 @@ class I18nAgent:
         output_dir: str = ".",
         namespace: str = "translation",
         default_locale: str = "en",
+        rules_text: str = "",
+        existing_i18n: dict | None = None,
     ) -> None:
         """
         Generate i18n files for the given locales.
@@ -271,6 +327,8 @@ class I18nAgent:
             output_dir:      Root directory where generated files will be saved
             namespace:       i18next namespace (default: 'translation')
             default_locale:  Source-of-truth locale (default: 'en')
+            rules_text:      Project rules block to prepend to prompt
+            existing_i18n:   Auto-detected existing i18n setup info
         """
         # Validate locales
         valid = [lc for lc in target_locales if lc in SUPPORTED_LOCALES]
@@ -321,6 +379,8 @@ class I18nAgent:
             target_locales=valid,
             namespace=namespace,
             default_locale=default_locale,
+            rules_text=rules_text,
+            existing_i18n=existing_i18n,
         )
 
         files = self.agent.generate_code(prompt)
@@ -369,6 +429,8 @@ def run_i18n_agent(
     output_dir: str = ".",
     namespace: str = "translation",
     default_locale: str = "en",
+    rules_text: str = "",
+    existing_i18n: dict | None = None,
 ) -> None:
     """Entry point for --add-i18n CLI flag."""
     agent = I18nAgent(project_dir)
@@ -377,4 +439,6 @@ def run_i18n_agent(
         output_dir=output_dir,
         namespace=namespace,
         default_locale=default_locale,
+        rules_text=rules_text,
+        existing_i18n=existing_i18n,
     )
