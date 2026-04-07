@@ -10,3 +10,6 @@ base64io>=1.0.3
 
 # RAG / Vector Search
 chromadb>=0.5.0
+
+# MCP (Model Context Protocol)
+mcp>=1.0.0

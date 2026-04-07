@@ -43,6 +43,8 @@ from agent.rag_engine import RAGEngine, index_codebase, search_codebase
 from agent.frontend_agent import run_a11y_heal, run_component_generate, run_style_refactor
 from agent.amplitude_agent import run_amplitude_agent
 from agent.i18n_agent import run_i18n_agent, SUPPORTED_LOCALES
+from agent.mcp_agent import run_mcp_agent
+from connectors.mcp_connector import MCPConnector, parse_server_string
 from templates.prompt_template import (
     build_full_feature_prompt,
     build_code_review_prompt,
@@ -111,8 +113,13 @@ BANNER = """
 @click.option("--add-i18n", "add_i18n", help="Generate i18n/translations integration (path to project)")
 @click.option("--locales", "locales", default="en,es,fr,de", help="Comma-separated locale codes e.g. en,es,fr,de,ja")
 @click.option("--i18n-ns", "i18n_ns", default="translation", help="i18next namespace (default: translation)")
+# ── MCP flags ──────────────────────────────────────────────────────────────
+@click.option("--mcp", "mcp_server", help="MCP server to connect to. Stdio: 'npx -y @modelcontextprotocol/server-filesystem .' or SSE: 'http://localhost:8080/sse'")
+@click.option("--mcp-task", "mcp_task", help="Task for the MCP agentic loop (use with --mcp)")
+@click.option("--mcp-list", "mcp_list", is_flag=True, help="List all tools exposed by the MCP server (use with --mcp)")
+@click.option("--mcp-name", "mcp_name", default="server", help="Friendly name for the MCP server (default: server)")
 @click.pass_context
-def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url, heal, heal_framework, heal_retries, generate_ci, index_path, search_query, costs, heal_a11y, a11y_file, a11y_dry_run, new_component, component_desc, component_type, style_lib, refactor_styles, refactor_target, add_analytics, app_name, env_prefix, add_i18n, locales, i18n_ns):
+def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url, heal, heal_framework, heal_retries, generate_ci, index_path, search_query, costs, heal_a11y, a11y_file, a11y_dry_run, new_component, component_desc, component_type, style_lib, refactor_styles, refactor_target, add_analytics, app_name, env_prefix, add_i18n, locales, i18n_ns, mcp_server, mcp_task, mcp_list, mcp_name):
     """🤖 Claude AI Agent — Generate production code from Jira + Figma + API Docs."""
     console.print(BANNER)
 
@@ -161,6 +168,11 @@ def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test
         run_add_analytics_mode(add_analytics, app_name, env_prefix, output)
     elif add_i18n:
         run_add_i18n_mode(add_i18n, locales, i18n_ns, output)
+    # ── MCP route ──────────────────────────────────────────────────────────
+    elif mcp_server and mcp_list:
+        run_mcp_list_mode(mcp_server, mcp_name)
+    elif mcp_server:
+        run_mcp_mode(mcp_server, mcp_task, mcp_name)
     elif jira or figma or swagger:
         run_full_workflow(jira, figma, swagger, output, api_filter, stack, include_tests=not no_tests)
     else:
@@ -804,6 +816,58 @@ def run_add_i18n_mode(
 
 
 # ─────────────────────────────────────────────────
+# 🔌  MCP (Model Context Protocol) Mode
+# ─────────────────────────────────────────────────
+
+def run_mcp_mode(
+    server_str: str,
+    task: str | None = None,
+    server_name: str = "server",
+) -> None:
+    """Connect to an MCP server and run an agentic task."""
+    from connectors.mcp_connector import parse_server_string
+
+    config = parse_server_string(server_str, name=server_name)
+
+    console.print(Panel(
+        f"[bold]🔌 MCP Agentic Loop[/bold]\n"
+        f"Server : [cyan]{server_str}[/cyan]\n"
+        f"Name   : {server_name}",
+        style="cyan",
+    ))
+
+    if not task:
+        task = Prompt.ask(
+            "Task for Claude (e.g. 'List all React components in src/')",
+        )
+
+    run_mcp_agent(task=task, servers=[config])
+
+
+def run_mcp_list_mode(server_str: str, server_name: str = "server") -> None:
+    """List all tools exposed by an MCP server."""
+    import asyncio
+    from connectors.mcp_connector import MCPConnector, parse_server_string
+
+    config = parse_server_string(server_str, name=server_name)
+    connector = MCPConnector()
+
+    console.print(f"[cyan]🔌 Connecting to [bold]{server_name}[/bold]: {server_str}…[/cyan]")
+
+    async def _list():
+        tools = await connector.list_tools(config)
+        connector.print_tools(tools, server_name)
+        try:
+            resources = await connector.list_resources(config)
+            if resources:
+                connector.print_resources(resources, server_name)
+        except Exception:
+            pass  # Not all servers expose resources
+
+    asyncio.run(_list())
+
+
+# ─────────────────────────────────────────────────
 # Quick Menu (no args)
 # ─────────────────────────────────────────────────
 
@@ -831,6 +895,8 @@ def show_quick_menu():
         "16": ("\U0001f9f9 Refactor inline styles \u2192 Styled-Components / AntD 6",  "refactor"),
         "17": ("\U0001f4ca Generate Amplitude analytics integration",              "analytics"),
         "18": ("\U0001f30d Generate i18n / Translations (react-i18next)",          "i18n"),
+        # \u2500\u2500 MCP \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        "19": ("\U0001f50c MCP agent \u2014 Claude + Model Context Protocol tools",      "mcp"),
     }
 
     for key, (label, _) in options.items():
@@ -914,6 +980,19 @@ def show_quick_menu():
     elif mode == "i18n":
         project = Prompt.ask("Project directory", default=".")
         run_add_i18n_mode(project)
+    # ── MCP menu handler ─────────────────────────────────────────────────
+    elif mode == "mcp":
+        server = Prompt.ask(
+            "MCP server  (stdio: 'npx -y @modelcontextprotocol/server-filesystem .'  "
+            "or SSE: 'http://localhost:8080/sse')"
+        )
+        name = Prompt.ask("Server name", default="server")
+        list_only = Confirm.ask("List tools only (no task)?", default=False)
+        if list_only:
+            run_mcp_list_mode(server, name)
+        else:
+            task = Prompt.ask("Task for Claude")
+            run_mcp_mode(server, task, name)
 
 
 # ─────────────────────────────────────────────────

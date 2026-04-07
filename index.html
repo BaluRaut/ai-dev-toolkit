@@ -223,7 +223,7 @@
 </nav>
 
 <div class="hero">
-  <div class="hero-badge">&#128640; 18 Agentic Workflows &middot; Full Command Reference</div>
+  <div class="hero-badge">&#128640; 19 Agentic Workflows &middot; Full Command Reference</div>
   <h1>Build Faster With<br>AI-Powered Agents</h1>
   <p>Every command, every flag, exactly what happens under the hood &mdash; and the real-world use case it solves. From a Jira ticket to production-ready code in one shot.</p>
   <div class="btn-row">
@@ -234,7 +234,7 @@
 
 <div class="wrap">
   <div class="stats">
-    <div class="stat-card"><div class="stat-num">18</div><div class="stat-label">CLI Workflows</div></div>
+    <div class="stat-card"><div class="stat-num">19</div><div class="stat-label">CLI Workflows</div></div>
     <div class="stat-card"><div class="stat-num">30+</div><div class="stat-label">AI Models Supported</div></div>
     <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">Languages (i18n)</div></div>
     <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">Test Frameworks</div></div>
@@ -306,6 +306,7 @@
       <button class="filter-pill" onclick="setFilter('agentic',this)">Agentic Loops</button>
       <button class="filter-pill" onclick="setFilter('frontend',this)">Frontend</button>
       <button class="filter-pill" onclick="setFilter('analytics',this)">Analytics &amp; i18n</button>
+      <button class="filter-pill" onclick="setFilter('mcp',this)">MCP</button>
     </div>
   </div>
 </div>
@@ -944,6 +945,59 @@
       </div>
     </div>
 
+    <!-- 19. MCP Agent -->
+    <div class="cmd-card" data-cat="mcp" data-keywords="mcp model context protocol tools agent agentic loop stdio sse http filesystem git database browser server">
+      <div class="cmd-header" onclick="toggle(this)">
+        <div class="cmd-icon" style="background:linear-gradient(135deg,#7c3aed22,#a78bfa22);color:#a78bfa">&#128268;</div>
+        <div class="cmd-meta">
+          <div class="cmd-title">MCP Agent — Claude + Model Context Protocol</div>
+          <div class="cmd-subtitle">Connect any MCP server (stdio / SSE / HTTP) and run a full Claude agentic loop with its tools</div>
+        </div>
+        <div class="cmd-chevron">&#9662;</div>
+      </div>
+      <div class="cmd-flag">
+        <span class="flag">python main.py</span><span class="arg"> --mcp</span> <span class="val">'npx -y @modelcontextprotocol/server-filesystem .'</span><span class="arg"> --mcp-task</span> <span class="val">"List all exported components in src/"</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-section-title">&#9881;&#65039; Under the Hood</div>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">STEP 01</div><div class="step-text">Parse server string into transport config</div><div class="step-detail">Detects transport from the string: stdio (any executable), SSE (URL ending in /sse), or Streamable HTTP (other HTTP URL). Constructs MCPServerConfig with command/args or URL accordingly.</div></div>
+          <div class="step"><div class="step-num">STEP 02</div><div class="step-text">Open MCP session + discover tools</div><div class="step-detail">Opens an async session via the <code>mcp</code> Python SDK. Calls <code>list_tools()</code> on the server &mdash; returns names, descriptions, and JSON Schema input schemas for every tool. Optionally also lists resources.</div></div>
+          <div class="step"><div class="step-num">STEP 03</div><div class="step-text">Convert MCP tools → Claude API tool schemas</div><div class="step-detail">Maps each MCPTool to Anthropic's tool format (name, description, input_schema). Server-name prefix prevents collisions when multiple servers expose same-named tools (e.g. filesystem__read_file).</div></div>
+          <div class="step"><div class="step-num">STEP 04</div><div class="step-text">Claude decides which tools to call</div><div class="step-detail">The task + all tool schemas are sent to Claude. Claude reasons over the task and emits <code>tool_use</code> blocks specifying which tool to call and with what arguments.</div></div>
+          <div class="step"><div class="step-num">STEP 05</div><div class="step-text">Execute tool calls via MCP server</div><div class="step-detail">Each <code>tool_use</code> block is routed to the correct MCP server's <code>call_tool()</code> method. Results (text content blocks) are collected and returned as <code>tool_result</code> messages.</div></div>
+          <div class="step"><div class="step-num">STEP 06</div><div class="step-text">Iterative loop until task complete</div><div class="step-detail">Tool results are appended to the message history and sent back to Claude. Claude continues calling tools or producing a final <code>end_turn</code> response. Hard cap at 20 iterations to prevent runaway loops.</div></div>
+        </div>
+        <div class="cmd-section-title">&#128161; Use Cases</div>
+        <div class="use-cases">
+          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Explore a codebase: list components, read files, summarise architecture</span>
+          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Query a database via MCP SQL server without writing SQL manually</span>
+          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Run Git operations (log, diff, branch) through Claude's reasoning</span>
+          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Connect to any third-party MCP server (Stripe, GitHub, Slack, Notion…)</span>
+          <span class="uc"><span class="uc-dot" style="background:#a78bfa"></span>Chain multiple MCP servers in a single agentic session</span>
+        </div>
+        <div class="cmd-section-title">&#127993; Output</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+          <span class="output-badge">Tool call trace (console)</span>
+          <span class="output-badge">Claude final answer</span>
+          <span class="output-badge">Token + cost summary</span>
+        </div>
+        <table class="flags-table">
+          <thead><tr><th>Flag</th><th>Description</th><th>Default</th></tr></thead>
+          <tr><td class="flag-name">--mcp</td><td class="flag-desc">MCP server — stdio command or HTTP/SSE URL</td><td class="flag-default">—</td></tr>
+          <tr><td class="flag-name">--mcp-task</td><td class="flag-desc">Natural-language task for the agentic loop</td><td class="flag-default">prompted</td></tr>
+          <tr><td class="flag-name">--mcp-list</td><td class="flag-desc">List all tools (and resources) without running a task</td><td class="flag-default">off</td></tr>
+          <tr><td class="flag-name">--mcp-name</td><td class="flag-desc">Friendly label for the server (used as tool prefix)</td><td class="flag-default">server</td></tr>
+        </table>
+        <div style="margin-top:14px;padding:12px 16px;background:var(--bg-code);border-radius:8px;border-left:3px solid #a78bfa;font-size:.82rem;color:var(--muted)">
+          <strong style="color:#a78bfa">&#128276; Quick Start</strong><br>
+          Install popular MCP servers: <code style="color:var(--accent)">npx -y @modelcontextprotocol/server-filesystem .</code> (files) &nbsp;|&nbsp;
+          <code style="color:var(--accent)">uvx mcp-server-git</code> (Git) &nbsp;|&nbsp;
+          <code style="color:var(--accent)">npx -y @modelcontextprotocol/server-github</code> (GitHub)
+        </div>
+      </div>
+    </div>
+
     <div class="no-results" id="no-results">No commands match your search.</div>
   </div>
 
@@ -979,6 +1033,8 @@
           <tr><td class="ref-cmd">--add-i18n ./src --locales en,es,fr,de,ja,zh</td><td class="ref-desc">Extract strings + generate react-i18next v14 for 6 locales</td><td><span class="ref-cat" style="background:var(--green-dim);color:var(--green)">i18n</span></td></tr>
           <tr><td class="ref-cmd">--jira PROJ-123</td><td class="ref-desc">Fetch + preview Jira ticket context only</td><td><span class="ref-cat" style="background:var(--accent-dim);color:var(--accent)">Workflow</span></td></tr>
           <tr><td class="ref-cmd">--figma https://figma.com/file/&#8230;</td><td class="ref-desc">Fetch + preview Figma component tree + screenshot</td><td><span class="ref-cat" style="background:var(--accent-dim);color:var(--accent)">Workflow</span></td></tr>
+          <tr><td class="ref-cmd">--mcp 'npx -y @modelcontextprotocol/server-filesystem .' --mcp-task "list components"</td><td class="ref-desc">Run Claude agentic loop with MCP tools (stdio/SSE/HTTP)</td><td><span class="ref-cat" style="background:#1e1b2e;color:#a78bfa">MCP</span></td></tr>
+          <tr><td class="ref-cmd">--mcp 'http://localhost:8080/sse' --mcp-list</td><td class="ref-desc">Discover all tools exposed by an MCP server</td><td><span class="ref-cat" style="background:#1e1b2e;color:#a78bfa">MCP</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -992,7 +1048,7 @@
      <a href="https://github.com/BaluRaut/ai-dev-toolkit" target="_blank">GitHub Repository</a> &middot;
      Deployed via GitHub Pages
   </p>
-  <p style="margin-top:8px;font-size:.78rem;">18 workflows &middot; 30+ AI models &middot; React &middot; TypeScript &middot; Python</p>
+  <p style="margin-top:8px;font-size:.78rem;">19 workflows &middot; 30+ AI models &middot; React &middot; TypeScript &middot; Python</p>
 </footer>
 
 <script>
