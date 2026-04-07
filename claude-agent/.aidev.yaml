@@ -1,0 +1,175 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# .aidev.yaml  —  Project-level rules for the AI Dev Toolkit
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+# Drop this file in your project root. The AI agent reads it BEFORE every
+# generation, review, or refactor — and follows these rules automatically.
+#
+# Generate a starter config:  aidev --init-rules
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Project metadata ─────────────────────────────────────────────────────────
+project:
+  name: "My SaaS App"
+  description: "Customer-facing dashboard with billing, analytics, and team management"
+  type: "frontend"                        # frontend | backend | fullstack | library | monorepo
+
+# ── Tech stack (overrides .env PROJECT_TECH_STACK) ──────────────────────────
+stack:
+  language: "TypeScript 5.4"
+  framework: "React 18.3"
+  ui_library: "Ant Design 6"              # antd | mui | chakra | shadcn | tailwind | none
+  state: "Zustand 5"                      # zustand | redux-toolkit | jotai | recoil | context | none
+  data_fetching: "TanStack Query v5"      # tanstack-query | swr | rtk-query | axios | fetch
+  styling: "styled-components"            # styled-components | css-modules | tailwind | emotion | sass
+  router: "React Router 7"               # react-router | next-router | tanstack-router
+  test_runner: "jest"                     # jest | vitest | playwright | pytest
+  package_manager: "pnpm"                # npm | pnpm | yarn | bun
+  node_version: "20"
+  python_version: "3.12"
+
+# ── File & code rules ───────────────────────────────────────────────────────
+rules:
+  # ─ File length ─────────────────────────────────────────────────────────────
+  max_lines_per_file: 150                 # Hard limit — split into sub-modules if exceeded
+  max_lines_per_function: 40              # Extract helper functions above this
+  max_lines_per_component: 120            # React component body (JSX + hooks)
+
+  # ─ SOLID principles ───────────────────────────────────────────────────────
+  solid:
+    single_responsibility: true           # One file = one purpose. No god-components.
+    open_closed: true                     # Extend via props/composition, not modification
+    liskov_substitution: true             # Subtypes must be usable in place of base types
+    interface_segregation: true           # Small, focused interfaces — no mega-Props types
+    dependency_inversion: true            # Depend on abstractions (interfaces), not concretions
+
+  # ─ Naming conventions ─────────────────────────────────────────────────────
+  naming:
+    components: "PascalCase"              # UserProfileCard, PaymentForm
+    hooks: "camelCase with use prefix"    # useUserPermissions, usePaymentStatus
+    services: "camelCase"                 # fetchUserProfile, createPayment
+    types: "PascalCase with suffix"       # UserProfileProps, PaymentFormState, ApiResponse
+    constants: "SCREAMING_SNAKE_CASE"     # MAX_RETRY_COUNT, API_BASE_URL
+    files:
+      components: "PascalCase.tsx"        # UserProfileCard.tsx
+      hooks: "camelCase.ts"              # useUserPermissions.ts
+      services: "camelCase.ts"           # paymentService.ts
+      types: "camelCase.types.ts"        # payment.types.ts
+      tests: "__tests__/[name].test.tsx"  # __tests__/UserProfileCard.test.tsx
+      e2e: "e2e/[feature].spec.ts"       # e2e/checkout.spec.ts
+      styles: "[Name].styled.ts"         # UserProfileCard.styled.ts
+
+  # ─ Import rules ────────────────────────────────────────────────────────────
+  imports:
+    style: "named"                        # named | default | barrel
+    order:                                # Enforced import group order
+      - "react"                           # React and React DOM
+      - "third-party"                     # node_modules
+      - "@/lib"                           # Internal libraries / utilities
+      - "@/components"                    # Shared components
+      - "@/hooks"                         # Custom hooks
+      - "@/services"                      # API services
+      - "@/types"                         # TypeScript types
+      - "./relative"                      # Relative imports (siblings)
+      - "./styles"                        # Styles last
+    no_default_export: true               # Prefer named exports (tree-shakable)
+    barrel_exports: true                  # index.ts re-exports in each folder
+
+  # ─ Component rules ─────────────────────────────────────────────────────────
+  components:
+    pattern: "functional"                 # functional | class (legacy only)
+    props: "destructured"                 # Destructure props in function signature
+    state_management: "hooks"             # hooks | class-state
+    error_boundary: true                  # Wrap every route-level component
+    loading_state: true                   # Every data-fetching component MUST show loading
+    empty_state: true                     # Every list/table MUST handle empty data
+    data_testid: true                     # EVERY interactive element gets data-testid
+    memo_threshold: 5                     # Wrap in React.memo if >5 props
+
+  # ─ Error handling ──────────────────────────────────────────────────────────
+  error_handling:
+    try_catch: "always on async"          # Every async function gets try/catch
+    error_boundary: true                  # Route-level ErrorBoundary components
+    user_facing_messages: true            # Never show raw error objects to users
+    logging: "console.error + Sentry"     # Where errors are logged
+    retry_strategy: "exponential"         # none | linear | exponential
+
+  # ─ Accessibility ───────────────────────────────────────────────────────────
+  accessibility:
+    standard: "WCAG 2.1 AA"
+    aria_labels: true                     # All interactive elements
+    keyboard_nav: true                    # Full keyboard navigation support
+    focus_management: true                # Modals trap focus, drawers manage focus
+    color_contrast: "4.5:1"               # Minimum contrast ratio
+    screen_reader: true                   # Semantic HTML + aria-live for dynamic content
+
+  # ─ Testing ─────────────────────────────────────────────────────────────────
+  testing:
+    min_coverage: 80                      # Percentage — block merge below this
+    unit_test_per_component: true         # Every component gets a test file
+    e2e_critical_paths: true              # Checkout, auth, onboarding must have E2E
+    mock_strategy: "msw"                  # msw | jest.mock | manual
+    snapshot_tests: false                 # Avoid snapshot tests (fragile)
+    test_user_events: true                # Use @testing-library/user-event, not fireEvent
+
+  # ─ Code style ──────────────────────────────────────────────────────────────
+  style:
+    semicolons: true
+    quotes: "single"                      # single | double
+    trailing_comma: "all"
+    indent: 2
+    max_line_length: 100
+    print_width: 100
+
+# ── Folder structure ─────────────────────────────────────────────────────────
+# The AI follows this exactly when generating new features.
+folder_structure:
+  pattern: "feature-based"                # feature-based | atomic | flat | domain-driven
+  layout: |
+    src/
+    ├── features/              # Feature modules (one folder per feature)
+    │   └── [feature-name]/
+    │       ├── components/    # Feature-specific components
+    │       ├── hooks/         # Feature-specific hooks
+    │       ├── services/      # Feature-specific API calls
+    │       ├── types/         # Feature-specific types
+    │       ├── utils/         # Feature-specific utilities
+    │       ├── __tests__/     # Unit tests
+    │       └── index.ts       # Barrel export
+    ├── components/            # Shared / reusable components
+    │   └── ui/                # Atomic design: Button, Input, Modal
+    ├── hooks/                 # Shared hooks
+    ├── services/              # Shared API services
+    ├── lib/                   # Third-party wrappers, utilities
+    ├── types/                 # Global TypeScript types
+    ├── styles/                # Global styles, theme
+    ├── config/                # App configuration
+    └── app/                   # App shell, router, providers
+
+# ── Legacy codebase support ──────────────────────────────────────────────────
+# If you're working on an older project, tell the AI what already exists.
+legacy:
+  has_class_components: false              # true → AI won't refactor existing class components
+  has_redux_legacy: false                  # true → AI uses Redux patterns (not Zustand)
+  has_enzyme_tests: false                  # true → AI generates Enzyme-compatible tests
+  has_css_modules: false                   # true → AI uses CSS Modules instead of styled-components
+  has_webpack: false                       # true → AI respects webpack aliases (e.g. @/)
+  has_cra: false                           # true → AI avoids Vite-only features
+  existing_test_patterns: ""              # Path glob — AI reads existing tests to match style
+  existing_component_patterns: ""         # Path glob — AI reads a sample component to match style
+  migration_mode: false                    # true → AI generates migration-safe code (backward compat)
+  typescript_strict: true                  # false → AI tolerates 'any' in legacy code
+
+# ── Custom rules (free text) ────────────────────────────────────────────────
+# Add any team-specific rules. The AI reads these verbatim.
+custom_rules:
+  - "Never use default exports — always use named exports"
+  - "Every API service function must accept an AbortSignal parameter"
+  - "All dates must use dayjs, never native Date or moment"
+  - "No inline styles — use styled-components or AntD tokens only"
+  - "Every user action must fire an Amplitude analytics event"
+  - "All strings visible to users must use i18n t() function"
+  - "Console.log is banned in production code — use the logger utility"
+  - "Every PR must include a changeset (npx changeset)"
+  - "Components over 120 lines must be split into sub-components"
+  - "Hooks must not call other hooks conditionally"

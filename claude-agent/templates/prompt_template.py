@@ -17,6 +17,7 @@ def build_full_feature_prompt(
     extra_instructions: str = "",
     include_unit_tests: bool = True,
     include_e2e_tests: bool = True,
+    rules_text: str = "",
 ) -> str:
     """
     Build the master prompt that combines Jira + Figma + API docs.
@@ -73,7 +74,9 @@ def build_full_feature_prompt(
    - `playwright.config.ts` — Playwright config (baseURL, browsers, viewport)
 """
 
-    prompt = f"""You are a senior full-stack developer AND testing expert. Your task is to generate production-ready code WITH comprehensive tests for a feature based on the context provided below.
+    rules_block = f"{rules_text}\n" if rules_text else ""
+
+    prompt = f"""{rules_block}You are a senior full-stack developer AND testing expert. Your task is to generate production-ready code WITH comprehensive tests for a feature based on the context provided below.
 
 ## IMPORTANT RULES:
 1. Generate COMPLETE, working code — no placeholders, no TODOs, no "// implement here"
@@ -135,9 +138,10 @@ Now generate ALL the code files INCLUDING all unit tests and E2E tests:"""
     return prompt
 
 
-def build_code_review_prompt(code: str) -> str:
+def build_code_review_prompt(code: str, rules_text: str = "") -> str:
     """Build a prompt for code review."""
-    return f"""You are a senior code reviewer. Review the following code for:
+    rules_block = f"{rules_text}\n" if rules_text else ""
+    return f"""{rules_block}You are a senior code reviewer. Review the following code for:
 
 1. **Bugs & Logic Errors** — Find any bugs or incorrect logic
 2. **Security** — XSS, injection, auth issues, exposed secrets
@@ -158,9 +162,10 @@ For each issue found, provide:
 """
 
 
-def build_test_generation_prompt(code: str, framework: str = "Jest + React Testing Library") -> str:
+def build_test_generation_prompt(code: str, framework: str = "Jest + React Testing Library", rules_text: str = "") -> str:
     """Build a prompt for test generation."""
-    return f"""You are a testing expert. Generate comprehensive tests for the code below.
+    rules_block = f"{rules_text}\n" if rules_text else ""
+    return f"""{rules_block}You are a testing expert. Generate comprehensive tests for the code below.
 
 ## TESTING RULES:
 1. Use {framework}
@@ -186,9 +191,10 @@ For EACH test file, use:
 Generate all test files now:"""
 
 
-def build_refactor_prompt(code: str, instructions: str = "") -> str:
+def build_refactor_prompt(code: str, instructions: str = "", rules_text: str = "") -> str:
     """Build a prompt for code refactoring."""
-    return f"""You are a refactoring expert. Refactor the following code while maintaining ALL existing functionality.
+    rules_block = f"{rules_text}\n" if rules_text else ""
+    return f"""{rules_block}You are a refactoring expert. Refactor the following code while maintaining ALL existing functionality.
 
 ## REFACTORING GOALS:
 1. Improve readability and maintainability
@@ -216,9 +222,10 @@ For EACH refactored file, use:
 Generate all refactored files:"""
 
 
-def build_bug_fix_prompt(error_message: str, code: str) -> str:
+def build_bug_fix_prompt(error_message: str, code: str, rules_text: str = "") -> str:
     """Build a prompt for debugging and fixing."""
-    return f"""You are a debugging expert. Find the root cause and fix the bug.
+    rules_block = f"{rules_text}\n" if rules_text else ""
+    return f"""{rules_block}You are a debugging expert. Find the root cause and fix the bug.
 
 ## ERROR:
 ```
@@ -250,12 +257,14 @@ def build_bug_fix_prompt(error_message: str, code: str) -> str:
 
 
 def build_playwright_e2e_prompt(
-    code: str,
-    feature_description: str = "",
+    source_code: str,
+    app_description: str = "",
     base_url: str = "http://localhost:3000",
+    rules_text: str = "",
 ) -> str:
     """Build a prompt specifically for Playwright E2E test generation."""
-    return f"""You are a senior QA automation engineer specializing in Playwright E2E testing.
+    rules_block = f"{rules_text}\n" if rules_text else ""
+    return f"""{rules_block}You are a senior QA automation engineer specializing in Playwright E2E testing.
 Generate comprehensive end-to-end tests for the feature described below.
 
 ## PLAYWRIGHT E2E TESTING RULES:
@@ -362,20 +371,22 @@ For EACH file, use:
 ===END FILE===
 
 ## FEATURE DESCRIPTION:
-{feature_description if feature_description else "(Infer from the code below)"}
+{app_description if app_description else "(Infer from the code below)"}
 
 ## BASE URL: {base_url}
 
 ## SOURCE CODE TO GENERATE E2E TESTS FOR:
-{code}
+{source_code}
 
 Generate ALL E2E test files now (playwright.config.ts + page objects + specs + fixtures):"""
 
 
 def build_unit_test_prompt(
-    code: str,
-    framework: str = "Jest + React Testing Library",
+    source_code: str,
+    file_name: str = "",
+    test_framework: str = "Jest + React Testing Library",
     include_msw: bool = True,
+    rules_text: str = "",
 ) -> str:
     """Build a prompt specifically for comprehensive unit test generation."""
     msw_section = """
@@ -404,11 +415,13 @@ afterAll(() => server.close());
 ```
 """ if include_msw else ""
 
-    return f"""You are a senior testing engineer. Generate comprehensive unit tests for the code below.
+    rules_block = f"{rules_text}\n" if rules_text else ""
+
+    return f"""{rules_block}You are a senior testing engineer. Generate comprehensive unit tests for the code below.
 
 ## UNIT TESTING RULES:
 
-### Framework: {framework}
+### Framework: {test_framework}
 
 ### Test Structure:
 - One test file per source file: `__tests__/[filename].test.ts(x)`
@@ -479,6 +492,6 @@ For EACH test file, use:
 ===END FILE===
 
 ## SOURCE CODE TO TEST:
-{code}
+{source_code}
 
 Generate ALL unit test files with comprehensive coverage:"""

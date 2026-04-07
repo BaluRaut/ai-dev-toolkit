@@ -44,6 +44,7 @@ from agent.frontend_agent import run_a11y_heal, run_component_generate, run_styl
 from agent.amplitude_agent import run_amplitude_agent
 from agent.i18n_agent import run_i18n_agent, SUPPORTED_LOCALES
 from agent.mcp_agent import run_mcp_agent
+from agent.rules_engine import load_rules, build_rules_prompt, init_rules_file
 from connectors.mcp_connector import MCPConnector, parse_server_string, list_presets
 from templates.prompt_template import (
     build_full_feature_prompt,
@@ -119,8 +120,9 @@ BANNER = """
 @click.option("--mcp-list", "mcp_list", is_flag=True, help="List all tools exposed by the MCP server (use with --mcp)")
 @click.option("--mcp-name", "mcp_name", default="server", help="Friendly name for the MCP server (default: server)")
 @click.option("--mcp-presets", "mcp_presets", is_flag=True, help="List all built-in MCP server presets (figma, jira, github, …)")
+@click.option("--init-rules", "init_rules", is_flag=True, help="Generate a starter .aidev.yaml rules config in the current directory")
 @click.pass_context
-def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url, heal, heal_framework, heal_retries, generate_ci, index_path, search_query, costs, heal_a11y, a11y_file, a11y_dry_run, new_component, component_desc, component_type, style_lib, refactor_styles, refactor_target, add_analytics, app_name, env_prefix, add_i18n, locales, i18n_ns, mcp_server, mcp_task, mcp_list, mcp_name, mcp_presets):
+def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test, e2e, unit_test, fix, stack, no_tests, base_url, heal, heal_framework, heal_retries, generate_ci, index_path, search_query, costs, heal_a11y, a11y_file, a11y_dry_run, new_component, component_desc, component_type, style_lib, refactor_styles, refactor_target, add_analytics, app_name, env_prefix, add_i18n, locales, i18n_ns, mcp_server, mcp_task, mcp_list, mcp_name, mcp_presets, init_rules):
     """🤖 Claude AI Agent — Generate production code from Jira + Figma + API Docs."""
     console.print(BANNER)
 
@@ -138,6 +140,11 @@ def cli(ctx, jira, figma, swagger, output, api_filter, interactive, review, test
     # Route to appropriate mode
     if costs:
         TokenTracker.instance().print_session_summary()
+    elif init_rules:
+        path = init_rules_file(".")
+        console.print(f"[bold green]✅ Created {path}[/bold green]")
+        console.print("[dim]   Edit the file to match your project's tech stack, rules, and conventions.[/dim]")
+        console.print("[dim]   The agent will auto-load it before every generation.[/dim]")
     elif interactive:
         run_interactive_mode(stack)
     elif review:
@@ -278,6 +285,12 @@ def run_full_workflow(
     console.print(Panel("[bold]🧠 Step 3/4: Sending to Claude Agent[/bold]", style="cyan"))
 
     stack = tech_stack or Config.PROJECT_TECH_STACK
+
+    # Load project rules from .aidev.yaml
+    target = output_dir or "."
+    rules = load_rules(target)
+    rules_text = build_rules_prompt(rules)
+
     prompt = build_full_feature_prompt(
         jira_context=jira_context or "(No Jira ticket provided)",
         figma_context=figma_context or "(No Figma design provided)",
@@ -285,6 +298,7 @@ def run_full_workflow(
         tech_stack=stack,
         include_unit_tests=include_tests,
         include_e2e_tests=include_tests,
+        rules_text=rules_text,
     )
 
     if include_tests:
@@ -360,12 +374,16 @@ def run_interactive_mode(tech_stack: str | None = None):
     extra = Prompt.ask("Any extra instructions? (or Enter to skip)", default="")
 
     # Build prompt
+    rules = load_rules(".")
+    rules_text = build_rules_prompt(rules)
+
     prompt = build_full_feature_prompt(
         jira_context=f"## 📋 JIRA TICKET\n{jira_text}" if jira_text else "(No Jira ticket)",
         figma_context=f"## 🎨 FIGMA DESIGN\n{figma_text}" if figma_text else "(No design)",
         api_context=f"## 🔌 API ENDPOINTS\n{api_text}" if api_text else "(No API docs)",
         tech_stack=stack,
         extra_instructions=extra,
+        rules_text=rules_text,
     )
 
     # Send to Claude
@@ -395,7 +413,9 @@ def run_code_review(file_path: str):
         return
 
     code = path.read_text()
-    prompt = build_code_review_prompt(code)
+    rules = load_rules(file_path)
+    rules_text = build_rules_prompt(rules)
+    prompt = build_code_review_prompt(code, rules_text=rules_text)
 
     agent = ClaudeAgent()
     review = agent.chat(prompt)
@@ -417,7 +437,9 @@ def run_test_generation(file_path: str):
 
     code = path.read_text()
     framework = Prompt.ask("Test framework", default="Jest + React Testing Library")
-    prompt = build_test_generation_prompt(code, framework)
+    rules = load_rules(file_path)
+    rules_text = build_rules_prompt(rules)
+    prompt = build_test_generation_prompt(code, framework, rules_text=rules_text)
 
     agent = ClaudeAgent()
     files = agent.generate_code(prompt)
@@ -470,10 +492,15 @@ def run_playwright_e2e_generation(source_path: str, base_url: str = "http://loca
         default="Web application with standard CRUD features",
     )
 
+    # Load project rules
+    rules = load_rules(source_path)
+    rules_text = build_rules_prompt(rules)
+
     prompt = build_playwright_e2e_prompt(
         source_code=combined_source,
         app_description=app_description,
         base_url=base_url,
+        rules_text=rules_text,
     )
 
     console.print(f"[dim]   Prompt size: {len(prompt)} chars | Base URL: {base_url}[/dim]")
@@ -509,10 +536,14 @@ def run_unit_test_generation(file_path: str):
     code = path.read_text()
     framework = Prompt.ask("Test framework", default="Jest + React Testing Library")
 
+    rules = load_rules(file_path)
+    rules_text = build_rules_prompt(rules)
+
     prompt = build_unit_test_prompt(
         source_code=code,
         file_name=path.name,
         test_framework=framework,
+        rules_text=rules_text,
     )
 
     console.print(f"[dim]   Framework: {framework} | Prompt size: {len(prompt)} chars[/dim]")
@@ -549,7 +580,10 @@ def run_bug_fix(error_input: str):
         console.print("[dim]Paste the relevant code (press Enter twice to finish):[/dim]")
         code = _multiline_input()
 
-    prompt = build_bug_fix_prompt(error_message, code)
+    # Load project rules if available
+    rules = load_rules(error_input if os.path.exists(error_input) else ".")
+    rules_text = build_rules_prompt(rules)
+    prompt = build_bug_fix_prompt(error_message, code, rules_text=rules_text)
 
     agent = ClaudeAgent()
     result = agent.chat(prompt)
@@ -900,6 +934,7 @@ def show_quick_menu():
         "18": ("\U0001f30d Generate i18n / Translations (react-i18next)",          "i18n"),
         # \u2500\u2500 MCP \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
         "19": ("\U0001f50c MCP agent \u2014 Claude + Model Context Protocol tools",      "mcp"),
+        "20": ("\U0001f4cb Init .aidev.yaml \u2014 project rules for the AI agent",      "init-rules"),
     }
 
     for key, (label, _) in options.items():
@@ -996,6 +1031,13 @@ def show_quick_menu():
         else:
             task = Prompt.ask("Task for Claude")
             run_mcp_mode(server, task, name)
+    # ── Init rules handler ────────────────────────────────────────────────
+    elif mode == "init-rules":
+        target = Prompt.ask("Target directory", default=".")
+        path = init_rules_file(target)
+        console.print(f"[bold green]✅ Created {path}[/bold green]")
+        console.print("[dim]   Edit the file to match your project's tech stack, rules, and conventions.[/dim]")
+        console.print("[dim]   The agent will auto-load it before every generation.[/dim]")
 
 
 # ─────────────────────────────────────────────────
