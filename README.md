@@ -117,7 +117,45 @@ aidev --costs
 
 ---
 
-## 🔄 Self-Healing Loop — The Game Changer
+## � Project Rules for Legacy Codebases (`.aidev.yaml`)
+
+Respect existing codebase patterns without manually prompting Claude every time. The AI Dev Toolkit relies on a team-level configuration file: **`.aidev.yaml`**.
+
+### 1. Initialize Rules
+Run the following in your project root to generate a starter config:
+```bash
+aidev --init-rules
+```
+*(Or pick option **20** from the interactive menu).*
+
+### 2. Configure Your Team's Standards
+Edit the generated `.aidev.yaml` to enforce strict project rules across all generated code:
+
+- **File Limits:** Enforce `max_lines_per_file`, `max_lines_per_component`. The agent splits code into sub-modules if exceeded.
+- **SOLID Principles:** Toggle enforcement of Single Responsibility, Dependency Inversion, etc.
+- **Naming & Imports:** Enforce `PascalCase`, `use`-prefixes, no default exports, and absolute import ordering.
+- **Accessibility (A11y):** Mandate WCAG 2.1 AA compliance, `aria-labels`, focus management, and keyboard navigation.
+- **Legacy Codebase Flags:** Define migration rules so the agent doesn't rewrite older patterns unless asked:
+  ```yaml
+  legacy:
+    has_class_components: false
+    migration_mode: false
+    typescript_strict: true
+  ```
+- **Custom Rules:** Add free-text instructions (e.g., *"No `console.log`"*, *"Use day.js only"*).
+
+### 3. Auto-Detection (Zero-Config Magic)
+Even without tweaking the YAML, the agent automatically detects your existing stack by scanning your project root:
+- **Style libraries:** Detects `styled-components`, `antd`, `tailwindcss`, or `css-modules` from `package.json` to write matching styles.
+- **TypeScript & Linting:** Reads `tsconfig.json`, `.eslintrc`, and `.prettierrc` to match strictness and formatting.
+- **Existing setups:** Detects if you already use `react-i18next`, or `@amplitude/analytics-browser` to *extend* existing translation keys or event catalogs instead of generating conflicting wrappers.
+- **Component Patterns:** Scrapes your existing components and tests to match your internal file patterns exactly!
+
+Whenever you run **any** agent command, it injects these rules as a strict context block before any feature generation or code reviews.
+
+---
+
+## �🔄 Self-Healing Loop — The Game Changer
 
 The agent doesn't just generate code — it **verifies its own work**:
 
