@@ -112,50 +112,45 @@ aidev --costs
 | 🔍 **RAG Search** | `aidev --index ./src --search "auth logic"` | Semantic search across codebase |
 | 💰 **Costs** | `aidev --costs` | Show session token usage and costs |
 | ⏭️ **No Tests** | `aidev --jira PROJ-123 --no-tests` | Generate feature without tests |
+| 🏗️ **Project Rules** | `aidev --init-rules` | Generate a `.aidev.yaml` to configure project rules |
+| 🌍 **Add i18n** | `aidev --add-i18n ./src` | Extract strings, wrap in `t()`, generate i18n |
+| 📊 **Analytics** | `aidev --add-analytics ./` | Add/extend Amplitude analytics integration |
+| 🧩 **Component** | `aidev --new-component NavBar` | Generate full Component + Test + Types |
+| 🧹 **Refactor Styles**| `aidev --refactor-styles ./` | Migrate inline styles to styled-components/antd |
+| ♿️ **A11y Healer** | `aidev --heal-a11y ./` | Auto-detect and fix WCAG 2.1 accessibility issues |
 
 > **Tip:** All commands above use the `aidev` alias. Without it, prefix every command with `python main.py` from the `claude-agent/` directory.
 
 ---
 
-## � Project Rules for Legacy Codebases (`.aidev.yaml`)
+## 🏗️ Project Rules & Legacy Codebases (.aidev.yaml)
 
-Respect existing codebase patterns without manually prompting Claude every time. The AI Dev Toolkit relies on a team-level configuration file: **`.aidev.yaml`**.
+To ensure the AI generates code that matches your team's existing conventions, you can initialize a rules file:
 
-### 1. Initialize Rules
-Run the following in your project root to generate a starter config:
 ```bash
 aidev --init-rules
 ```
-*(Or pick option **20** from the interactive menu).*
 
-### 2. Configure Your Team's Standards
-Edit the generated `.aidev.yaml` to enforce strict project rules across all generated code:
+This creates a `.aidev.yaml` file in the root of your project. The AI will automatically read this file and inject its rules into every prompt.
 
-- **File Limits:** Enforce `max_lines_per_file`, `max_lines_per_component`. The agent splits code into sub-modules if exceeded.
-- **SOLID Principles:** Toggle enforcement of Single Responsibility, Dependency Inversion, etc.
-- **Naming & Imports:** Enforce `PascalCase`, `use`-prefixes, no default exports, and absolute import ordering.
-- **Accessibility (A11y):** Mandate WCAG 2.1 AA compliance, `aria-labels`, focus management, and keyboard navigation.
-- **Legacy Codebase Flags:** Define migration rules so the agent doesn't rewrite older patterns unless asked:
-  ```yaml
-  legacy:
-    has_class_components: false
-    migration_mode: false
-    typescript_strict: true
-  ```
-- **Custom Rules:** Add free-text instructions (e.g., *"No `console.log`"*, *"Use day.js only"*).
+**What it controls:**
+- **Code Limits:** Set max lines per file/function/component (agent will split files if exceeded).
+- **SOLID Principles:** Enforce Single Responsibility, Open/Closed, etc.
+- **Naming & Imports:** Enforce PascalCase components, `useX` hooks, no default exports, barrel exports.
+- **Component Rules:** Require `data-testid` attributes, error boundaries, loading states, and empty states.
+- **Legacy Codebase Flags:** Tell the AI not to touch existing class components, Redux `connect()`, Enzyme tests, CSS modules, or CRA.
 
-### 3. Auto-Detection (Zero-Config Magic)
-Even without tweaking the YAML, the agent automatically detects your existing stack by scanning your project root:
-- **Style libraries:** Detects `styled-components`, `antd`, `tailwindcss`, or `css-modules` from `package.json` to write matching styles.
-- **TypeScript & Linting:** Reads `tsconfig.json`, `.eslintrc`, and `.prettierrc` to match strictness and formatting.
-- **Existing setups:** Detects if you already use `react-i18next`, or `@amplitude/analytics-browser` to *extend* existing translation keys or event catalogs instead of generating conflicting wrappers.
-- **Component Patterns:** Scrapes your existing components and tests to match your internal file patterns exactly!
-
-Whenever you run **any** agent command, it injects these rules as a strict context block before any feature generation or code reviews.
+### ✨ Auto-Detection
+Even without configuring the YAML, the Agent **auto-detects** your existing project setup:
+- Reads your `tsconfig.json`, `.eslintrc`, and `package.json`.
+- Detects the style library (`styled-components`, `antd`, `tailwind`, or `css-modules`).
+- For **Analytics** (`--add-analytics`): Checks if you already use Amplitude/Mixpanel/Segment, reads your existing event catalog, and extends it instead of generating from scratch.
+- For **i18n** (`--add-i18n`): Detects `react-i18next`, `next-intl`, or `react-intl`, reads your existing translation keys, and outputs a `pending_keys.json` for translators.
+- Scans for representative existing test and component files to strictly match your codebase's style.
 
 ---
 
-## �🔄 Self-Healing Loop — The Game Changer
+## � Self-Healing Loop — The Game Changer
 
 The agent doesn't just generate code — it **verifies its own work**:
 
