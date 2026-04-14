@@ -1,0 +1,207 @@
+{
+  "name": "aidev-toolkit",
+  "displayName": "AI Dev Toolkit (@aidev)",
+  "description": "Chat with your AI Dev Toolkit — review files, generate tests, fix bugs, and run all 19 agentic workflows via @aidev in Copilot Chat.",
+  "version": "1.0.0",
+  "publisher": "BaluRaut",
+  "engines": { "vscode": "^1.93.0" },
+  "categories": ["AI", "Programming Languages", "Testing"],
+  "keywords": ["claude", "anthropic", "ai", "copilot", "jira", "figma", "testing", "review"],
+  "icon": "media/icon.png",
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "aidev.agent",
+        "fullName": "AI Dev Toolkit",
+        "name": "aidev",
+        "description": "Your agentic AI toolkit — review, test, fix, heal, generate, and more.",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "review",
+            "description": "Review the active file for bugs, security issues, and code quality"
+          },
+          {
+            "name": "test",
+            "description": "Generate Jest + RTL unit tests for the active file"
+          },
+          {
+            "name": "e2e",
+            "description": "Generate Playwright E2E tests for the active file"
+          },
+          {
+            "name": "fix",
+            "description": "Fix an error — paste the stack trace or describe the bug"
+          },
+          {
+            "name": "heal",
+            "description": "Self-heal failing CI tests — run → fix → repeat until green"
+          },
+          {
+            "name": "a11y",
+            "description": "Find and fix WCAG 2.1 AA accessibility violations"
+          },
+          {
+            "name": "ci",
+            "description": "Generate GitHub Actions CI/CD pipeline workflows"
+          },
+          {
+            "name": "index",
+            "description": "Index your codebase into a local RAG vector store"
+          },
+          {
+            "name": "search",
+            "description": "Semantically search your indexed codebase"
+          },
+          {
+            "name": "analytics",
+            "description": "Add typed Amplitude SDK v2 analytics to your app"
+          },
+          {
+            "name": "i18n",
+            "description": "Add react-i18next internationalisation to your app"
+          },
+          {
+            "name": "costs",
+            "description": "Show token usage and cost breakdown for the current session"
+          },
+          {
+            "name": "mcp",
+            "description": "Run an MCP agent task (figma, jira, github, filesystem, postgres…)"
+          },
+          {
+            "name": "help",
+            "description": "Show all available commands and example prompts"
+          }
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "aidev.reviewFile",
+        "title": "AI Dev: Review This File",
+        "category": "AI Dev"
+      },
+      {
+        "command": "aidev.generateTests",
+        "title": "AI Dev: Generate Unit Tests",
+        "category": "AI Dev"
+      },
+      {
+        "command": "aidev.generateE2E",
+        "title": "AI Dev: Generate E2E Tests",
+        "category": "AI Dev"
+      },
+      {
+        "command": "aidev.fixError",
+        "title": "AI Dev: Fix Error…",
+        "category": "AI Dev"
+      },
+      {
+        "command": "aidev.healTests",
+        "title": "AI Dev: Self-Heal Failing Tests",
+        "category": "AI Dev"
+      },
+      {
+        "command": "aidev.healA11y",
+        "title": "AI Dev: Fix Accessibility (a11y)",
+        "category": "AI Dev"
+      },
+      {
+        "command": "aidev.showCosts",
+        "title": "AI Dev: Show Session Costs",
+        "category": "AI Dev"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "aidev.reviewFile",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "aidev.generateTests",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t",
+        "when": "editorTextFocus"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "aidev.reviewFile",
+          "group": "aidev@1",
+          "when": "resourceExtname =~ /\\.(ts|tsx|js|jsx|py)$/"
+        },
+        {
+          "command": "aidev.generateTests",
+          "group": "aidev@2",
+          "when": "resourceExtname =~ /\\.(ts|tsx|js|jsx|py)$/"
+        },
+        {
+          "command": "aidev.generateE2E",
+          "group": "aidev@3",
+          "when": "resourceExtname =~ /\\.(ts|tsx|js|jsx)$/"
+        },
+        {
+          "command": "aidev.healA11y",
+          "group": "aidev@4",
+          "when": "resourceExtname =~ /\\.(tsx|jsx)$/"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "aidev.generateTests",
+          "group": "aidev@1"
+        },
+        {
+          "command": "aidev.healA11y",
+          "group": "aidev@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "AI Dev Toolkit",
+      "properties": {
+        "aidev.agentPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to your claude-agent/ directory. Leave empty to auto-detect from workspace."
+        },
+        "aidev.pythonPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the Python executable inside .venv. Leave empty to auto-detect."
+        },
+        "aidev.defaultTestFramework": {
+          "type": "string",
+          "enum": ["jest", "vitest", "playwright", "pytest"],
+          "default": "jest",
+          "description": "Default test framework used by --heal and --unit-test."
+        },
+        "aidev.defaultBaseUrl": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "description": "Base URL used for Playwright E2E test generation."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
+    "dev": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
+    "lint": "eslint src",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.93.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.4.0"
+  }
+}

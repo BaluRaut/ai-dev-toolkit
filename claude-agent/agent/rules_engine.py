@@ -434,6 +434,8 @@ def build_rules_prompt(rules: ProjectRules) -> str:
     imports = r.get("imports", {})
     if imports:
         lines = []
+        if imports.get("style"):
+            lines.append(f"- **Export/import style:** {imports['style']}")
         if imports.get("no_default_export"):
             lines.append("- **NO default exports** — always use named exports (tree-shakable)")
         if imports.get("barrel_exports"):
@@ -450,6 +452,10 @@ def build_rules_prompt(rules: ProjectRules) -> str:
         lines = []
         if comp.get("pattern"):
             lines.append(f"- **Pattern:** {comp['pattern']} components only")
+        if comp.get("props"):
+            lines.append(f"- **Props style:** {comp['props']}")
+        if comp.get("state_management"):
+            lines.append(f"- **State management:** {comp['state_management']}")
         if comp.get("error_boundary"):
             lines.append("- Every route-level component MUST have an ErrorBoundary")
         if comp.get("loading_state"):
@@ -458,6 +464,8 @@ def build_rules_prompt(rules: ProjectRules) -> str:
             lines.append("- Every list/table MUST handle the empty-data case")
         if comp.get("data_testid"):
             lines.append("- Every interactive element MUST have a `data-testid` attribute")
+        if comp.get("memo_threshold"):
+            lines.append(f"- Use memoization when a component exceeds **{comp['memo_threshold']} props**")
         if lines:
             sections.append("## Component Rules\n" + "\n".join(lines))
 
@@ -467,8 +475,12 @@ def build_rules_prompt(rules: ProjectRules) -> str:
         lines = []
         if err.get("try_catch"):
             lines.append(f"- **try/catch:** {err['try_catch']}")
+        if err.get("error_boundary"):
+            lines.append("- Route-level UI flows MUST be protected with an error boundary")
         if err.get("user_facing_messages"):
             lines.append("- NEVER show raw error objects to users")
+        if err.get("logging"):
+            lines.append(f"- **Logging:** {err['logging']}")
         if err.get("retry_strategy"):
             lines.append(f"- **Retry strategy:** {err['retry_strategy']}")
         if lines:
@@ -491,6 +503,10 @@ def build_rules_prompt(rules: ProjectRules) -> str:
         lines = []
         if test.get("min_coverage"):
             lines.append(f"- **Min coverage:** {test['min_coverage']}%")
+        if test.get("unit_test_per_component"):
+            lines.append("- Every component SHOULD have a unit test")
+        if test.get("e2e_critical_paths"):
+            lines.append("- Critical user journeys MUST include E2E coverage")
         if test.get("mock_strategy"):
             lines.append(f"- **Mock strategy:** {test['mock_strategy']}")
         if test.get("snapshot_tests") is False:
@@ -499,6 +515,25 @@ def build_rules_prompt(rules: ProjectRules) -> str:
             lines.append("- Use `@testing-library/user-event`, not `fireEvent`")
         if lines:
             sections.append("## Testing Rules\n" + "\n".join(lines))
+
+    # ── Code style ──────────────────────────────────────────────────────────
+    style = r.get("style", {})
+    if style:
+        lines = []
+        if "semicolons" in style:
+            lines.append(f"- **Semicolons:** {'required' if style['semicolons'] else 'omit'}")
+        if style.get("quotes"):
+            lines.append(f"- **Quotes:** {style['quotes']}")
+        if style.get("trailing_comma"):
+            lines.append(f"- **Trailing commas:** {style['trailing_comma']}")
+        if style.get("indent"):
+            lines.append(f"- **Indent:** {style['indent']} spaces")
+        if style.get("max_line_length"):
+            lines.append(f"- **Max line length:** {style['max_line_length']}")
+        if style.get("print_width"):
+            lines.append(f"- **Print width:** {style['print_width']}")
+        if lines:
+            sections.append("## Code Style\n" + "\n".join(lines))
 
     # ── Folder structure ─────────────────────────────────────────────────────
     layout = rules.folder_layout
@@ -517,12 +552,18 @@ def build_rules_prompt(rules: ProjectRules) -> str:
             active_flags.append("- ⚠️ **Enzyme tests exist** — match existing Enzyme patterns")
         if leg.get("has_css_modules"):
             active_flags.append("- ⚠️ **CSS Modules** — use .module.css, not styled-components")
+        if leg.get("has_webpack"):
+            active_flags.append("- ⚠️ **Webpack project** — respect existing webpack aliases and bundling constraints")
         if leg.get("has_cra"):
             active_flags.append("- ⚠️ **Create React App** — no Vite-only features")
         if leg.get("migration_mode"):
             active_flags.append("- ⚠️ **Migration mode** — backward-compatible code only, no breaking changes")
         if not leg.get("typescript_strict", True):
             active_flags.append("- ⚠️ **TypeScript non-strict** — `any` is tolerated in legacy files")
+        if leg.get("existing_test_patterns"):
+            active_flags.append(f"- **Existing test glob:** `{leg['existing_test_patterns']}` — match these patterns")
+        if leg.get("existing_component_patterns"):
+            active_flags.append(f"- **Existing component glob:** `{leg['existing_component_patterns']}` — match these patterns")
         if active_flags:
             sections.append("## Legacy Codebase Flags\n" + "\n".join(active_flags))
 

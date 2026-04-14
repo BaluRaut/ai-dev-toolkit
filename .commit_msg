@@ -1,0 +1,7 @@
+docs: add aidev alias setup to README and HTML install block
+
+- index.html: new 'Alias' tab in install block with zsh/bash setup commands
+  and aidev usage examples; First Run tab updated to use aidev
+- README.md: step 4 alias setup section; All Modes table updated to aidev;
+  self-heal, CI/CD, costs, RAG examples all use aidev
+- claude-agent/README.md: step 4 alias section with aidev examples

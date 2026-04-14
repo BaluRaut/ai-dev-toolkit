@@ -1,0 +1,14 @@
+feat: add .aidev.yaml project rules engine for legacy codebases
+
+- New .aidev.yaml config: team-level rules for file limits, SOLID,
+  naming, imports, components, a11y, testing, folder structure,
+  legacy flags (class components, Redux, Enzyme, CSS modules, CRA)
+- New agent/rules_engine.py: loads .aidev.yaml, auto-detects
+  tsconfig/eslint/prettier/package.json, reads existing test &
+  component samples to match patterns, builds structured rules block
+- All 7 prompt builders now accept rules_text param — project rules
+  are prepended to every Claude prompt automatically
+- New --init-rules flag generates a starter .aidev.yaml in CWD
+- Menu item 20: Init .aidev.yaml from the quick menu
+- Fixed param name mismatches in build_playwright_e2e_prompt and
+  build_unit_test_prompt (source_code, app_description, test_framework)
