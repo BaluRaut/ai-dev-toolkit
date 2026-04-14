@@ -127,12 +127,20 @@
     .pb-head h3{font-size:1rem;font-weight:700}
     .pb-time{font-size:.78rem;color:var(--muted);font-weight:500}
     .pb-steps{padding:0;list-style:none}
-    .pb-steps li{padding:14px 22px;border-bottom:1px solid var(--border);font-size:.88rem;display:flex;align-items:flex-start;gap:12px}
+    .pb-steps li{padding:14px 22px;border-bottom:1px solid var(--border);font-size:.88rem;display:flex;align-items:flex-start;gap:12px;min-width:0}
     .pb-steps li:last-child{border-bottom:none}
     .pb-sn{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:7px;background:var(--accent-dim);color:var(--accent);font-size:.72rem;font-weight:800;flex-shrink:0;margin-top:1px}
-    .pb-st{flex:1}
-    .pb-st code{display:block;font-family:var(--mono);font-size:.78rem;color:var(--accent);background:var(--bg-code);border:1px solid var(--border);border-radius:6px;padding:6px 10px;margin-top:6px;white-space:nowrap;overflow-x:auto}
+    .pb-st{flex:1;min-width:0;overflow:hidden}
+    .pb-st code{display:block;font-family:var(--mono);font-size:.78rem;color:var(--accent);background:var(--bg-code);border:1px solid var(--border);border-radius:6px;padding:6px 10px;margin-top:6px;white-space:nowrap;overflow-x:auto;max-width:100%}
     .pb-dt{font-size:.8rem;color:var(--muted);margin-top:4px}
+
+    /* Copy Button */
+    .code-wrap{position:relative}
+    .copy-btn{position:absolute;top:6px;right:6px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:.68rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;opacity:0;z-index:2}
+    .code-wrap:hover .copy-btn,.cmd-flag:hover .copy-btn,.ds-cmd:hover .copy-btn,.pb-st:hover .copy-btn{opacity:1}
+    .copy-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .copy-btn.copied{background:var(--green);color:#fff;border-color:var(--green)}
+    .copy-btn svg{width:12px;height:12px}
 
     /* Limits */
     .limit-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;gap:14px}
@@ -151,7 +159,7 @@
     .cmd-subtitle{font-size:.82rem;color:var(--muted)}
     .cmd-chevron{color:var(--muted);font-size:1rem;transition:transform .25s;margin-top:4px;flex-shrink:0}
     .cmd-card.open .cmd-chevron{transform:rotate(180deg)}
-    .cmd-flag{margin:0 22px 16px;background:var(--bg-code);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:var(--mono);font-size:.82rem;color:var(--accent);overflow-x:auto;white-space:nowrap}
+    .cmd-flag{margin:0 22px 16px;background:var(--bg-code);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:var(--mono);font-size:.82rem;color:var(--accent);overflow-x:auto;white-space:nowrap;position:relative}
     .cmd-flag .flag{color:var(--green)} .cmd-flag .arg{color:var(--accent)} .cmd-flag .val{color:var(--pink)} .cmd-flag .cmt{color:var(--muted);font-style:italic}
     .cmd-body{padding:0 22px 22px;display:none}
     .cmd-card.open .cmd-body{display:block}
@@ -201,7 +209,7 @@
     .ds:last-child{border-bottom:none}
     .ds-when{font-size:.86rem;font-weight:600;color:var(--text);margin-bottom:7px}
     .ds-when::before{content:'IF ';font-size:.68rem;font-weight:800;letter-spacing:.06em;color:var(--accent);margin-right:2px}
-    .ds-cmd{display:block;font-family:var(--mono);font-size:.76rem;color:var(--accent);background:var(--bg-code);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin:6px 0 8px;overflow-x:auto;white-space:nowrap}
+    .ds-cmd{display:block;font-family:var(--mono);font-size:.76rem;color:var(--accent);background:var(--bg-code);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin:6px 0 8px;overflow-x:auto;white-space:nowrap;position:relative}
     .ds-detail{font-size:.79rem;color:var(--muted);line-height:1.55}
     .ds-detail code{font-family:var(--mono);font-size:.74rem;color:var(--accent);background:var(--bg-code);padding:1px 5px;border-radius:4px}
 
@@ -214,6 +222,22 @@
     .filter-pill{padding:6px 16px;border-radius:100px;font-size:.8rem;font-weight:600;border:1px solid var(--border);background:var(--bg-card);color:var(--muted);cursor:pointer;transition:all .15s}
     .filter-pill:hover,.filter-pill.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
     .no-results{text-align:center;color:var(--muted);padding:60px 0;display:none;grid-column:1/-1}
+
+    /* Playground */
+    .playground-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .playground-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-code)}
+    .playground-title{font-size:.85rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+    .playground-title span{font-size:1.1rem}
+    .playground-actions{display:flex;gap:8px}
+    .pg-btn{padding:6px 14px;border-radius:8px;font-size:.78rem;font-weight:600;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+    .pg-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .pg-btn.run{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .pg-btn.run:hover{background:var(--accent-hi)}
+    #monaco-editor{height:220px;width:100%}
+    .playground-output{border-top:1px solid var(--border);padding:16px 20px;background:var(--bg);max-height:180px;overflow-y:auto}
+    .playground-output-title{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+    .playground-output pre{font-family:var(--mono);font-size:.8rem;color:var(--green);line-height:1.6;white-space:pre-wrap}
+    .playground-output.error pre{color:var(--red)}
 
     /* Footer */
     footer{border-top:1px solid var(--border);padding:40px 32px;text-align:center;color:var(--muted);font-size:.85rem;position:relative;z-index:1}
@@ -723,12 +747,44 @@ python main.py <span class="flag">--jira</span> <span class="val">PROJ-123</span
   <div style="height:80px"></div>
 </div>
 
+<!-- ═══ PLAYGROUND ═══ -->
+<div class="section">
+  <div class="wrap">
+    <div class="sec-head" style="text-align:center">
+      <div class="sec-badge">&#128187; Interactive</div>
+      <h2 class="sec-title">Try It Now</h2>
+      <p class="sec-sub" style="max-width:600px;margin:0 auto">Experiment with AI Dev Toolkit commands in this interactive playground. Edit the command below and see sample output.</p>
+    </div>
+    <div style="height:40px"></div>
+    <div class="playground-wrap">
+      <div class="playground-header">
+        <div class="playground-title"><span>⚡</span> Command Playground</div>
+        <div class="playground-actions">
+          <button class="pg-btn" onclick="resetPlayground()">↻ Reset</button>
+          <button class="pg-btn" onclick="copyPlayground()">📋 Copy</button>
+          <button class="pg-btn run" onclick="runPlayground()">▶ Run Demo</button>
+        </div>
+      </div>
+      <div id="monaco-editor"></div>
+      <div class="playground-output" id="playground-output" style="display:none">
+        <div class="playground-output-title">Output</div>
+        <pre id="playground-result"></pre>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:16px;font-size:.82rem;color:var(--muted)">💡 This is a demo — install the CLI to run real commands: <code style="background:var(--bg-code);padding:2px 8px;border-radius:4px;font-size:.78rem">pip install ai-dev-toolkit</code></p>
+  </div>
+  <div style="height:60px"></div>
+</div>
+
 <footer>
   <p>Built with ❤️ using <a href="https://www.anthropic.com" target="_blank">Claude by Anthropic</a> · <a href="https://github.com/BaluRaut/ai-dev-toolkit" target="_blank">GitHub</a> · Deployed via GitHub Pages</p>
   <p style="margin-top:8px;font-size:.78rem">Open source · 19 workflows · 30+ AI models · React · TypeScript · Python</p>
 </footer>
 
+<!-- Monaco Editor CDN -->
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
 <script>
+// Tab & accordion
 function switchEx(btn,id){btn.closest('div').querySelectorAll('.ex-tabs button').forEach(b=>b.classList.remove('active'));btn.closest('div').querySelectorAll('.ex-out').forEach(c=>c.classList.remove('active'));btn.classList.add('active');document.getElementById(id).classList.add('active')}
 function toggle(h){const c=h.closest('.cmd-card'),o=c.classList.contains('open');document.querySelectorAll('.cmd-card.open').forEach(x=>x.classList.remove('open'));if(!o)c.classList.add('open')}
 let activeFilter='all';
@@ -736,6 +792,103 @@ function setFilter(cat,btn){activeFilter=cat;document.querySelectorAll('.filter-
 function filterCards(){applyFilters()}
 function applyFilters(){const q=document.getElementById('search').value.toLowerCase().trim();const cards=document.querySelectorAll('#cmd-grid .cmd-card');let v=0;cards.forEach(c=>{const cat=c.dataset.cat||'';const kw=(c.dataset.keywords||'')+' '+(c.querySelector('.cmd-title')?.textContent||'')+' '+(c.querySelector('.cmd-subtitle')?.textContent||'');const ok=(activeFilter==='all'||cat===activeFilter)&&(!q||kw.toLowerCase().includes(q));c.style.display=ok?'':'none';if(ok)v++});document.getElementById('no-results').style.display=v===0?'block':'none'}
 document.querySelector('.cmd-card')?.classList.add('open');
+
+// Copy to clipboard
+const copyIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+const checkIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+function copyText(text,btn){
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.classList.add('copied');
+    btn.innerHTML=checkIcon+'Copied!';
+    setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML=copyIcon+'Copy';},1500);
+  });
+}
+
+// Add copy buttons to all code blocks
+document.addEventListener('DOMContentLoaded',()=>{
+  // Playbook code blocks
+  document.querySelectorAll('.pb-st code').forEach(code=>{
+    const btn=document.createElement('button');
+    btn.className='copy-btn';
+    btn.innerHTML=copyIcon+'Copy';
+    btn.onclick=(e)=>{e.stopPropagation();copyText(code.textContent,btn)};
+    code.parentElement.style.position='relative';
+    code.parentElement.appendChild(btn);
+  });
+  // Command flag blocks
+  document.querySelectorAll('.cmd-flag').forEach(block=>{
+    const btn=document.createElement('button');
+    btn.className='copy-btn';
+    btn.innerHTML=copyIcon+'Copy';
+    btn.onclick=(e)=>{e.stopPropagation();copyText(block.textContent.replace('Copy','').trim(),btn)};
+    block.appendChild(btn);
+  });
+  // Decision guide command blocks
+  document.querySelectorAll('.ds-cmd').forEach(block=>{
+    const btn=document.createElement('button');
+    btn.className='copy-btn';
+    btn.innerHTML=copyIcon+'Copy';
+    btn.onclick=(e)=>{e.stopPropagation();copyText(block.textContent.replace('Copy','').trim(),btn)};
+    block.appendChild(btn);
+  });
+});
+
+// Monaco Editor setup
+const defaultCode=`# AI Dev Toolkit - Interactive Demo
+# Try different commands!
+
+aidev --jira PROJ-123 --figma "https://figma.com/file/abc" --swagger ./api.json
+
+# Other examples to try:
+# aidev --review ./src/components/Header.tsx
+# aidev --unit-test ./src/utils/helpers.ts
+# aidev --heal ./ --heal-framework jest --heal-retries 3
+# aidev --ci --output ./`;
+
+const demoOutputs={
+  'jira':`🚀 AI Dev Toolkit v2.1.0\n\n📋 Fetching Jira ticket PROJ-123...\n   ✓ Title: Add user authentication flow\n   ✓ Type: Story | Priority: High\n   ✓ Acceptance criteria loaded (5 items)\n\n🎨 Parsing Figma design...\n   ✓ Components: LoginForm, AuthHeader, PasswordInput\n   ✓ Design tokens extracted (colors, spacing, typography)\n\n📄 Reading Swagger spec...\n   ✓ Endpoints: POST /auth/login, POST /auth/register\n   ✓ Request/Response schemas mapped\n\n⚙️  Generating code...\n   ✓ src/components/LoginForm.tsx (147 lines)\n   ✓ src/components/AuthHeader.tsx (52 lines)\n   ✓ src/hooks/useAuth.ts (89 lines)\n   ✓ src/api/authService.ts (63 lines)\n\n🧪 Generating tests...\n   ✓ __tests__/LoginForm.test.tsx (12 test cases)\n   ✓ __tests__/useAuth.test.ts (8 test cases)\n\n✅ Done! 6 files generated in 4.2s\n💰 Tokens: 12,450 | Cost: $0.037`,
+  'review':`🔍 AI Dev Toolkit - Code Review\n\n📄 Analyzing ./src/components/Header.tsx...\n\n⚠️  Issues Found (3):\n\n1. [PERFORMANCE] Line 24\n   useEffect missing dependency: 'userData'\n   → Add to dependency array or use useCallback\n\n2. [SECURITY] Line 45\n   Unsanitized user input in innerHTML\n   → Use textContent or sanitize-html library\n\n3. [STYLE] Line 12-18\n   Component props not typed\n   → Add TypeScript interface for props\n\n✅ Suggestions (2):\n   • Extract repeated styles to CSS module\n   • Consider React.memo for performance\n\n📊 Score: 7.2/10`,
+  'default':`⚡ AI Dev Toolkit\n\nRunning command...\n✓ Analysis complete\n✓ Code generated\n\n📁 Output saved to ./generated/`
+};
+
+let editor=null;
+require.config({paths:{'vs':'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs'}});
+require(['vs/editor/editor.main'],function(){
+  editor=monaco.editor.create(document.getElementById('monaco-editor'),{
+    value:defaultCode,
+    language:'shell',
+    theme:'vs-dark',
+    minimap:{enabled:false},
+    fontSize:14,
+    fontFamily:'JetBrains Mono, monospace',
+    lineNumbers:'on',
+    scrollBeyondLastLine:false,
+    automaticLayout:true,
+    padding:{top:16,bottom:16}
+  });
+});
+
+function resetPlayground(){
+  if(editor)editor.setValue(defaultCode);
+  document.getElementById('playground-output').style.display='none';
+}
+function copyPlayground(){
+  if(editor)navigator.clipboard.writeText(editor.getValue());
+}
+function runPlayground(){
+  const code=editor?editor.getValue():'';
+  const output=document.getElementById('playground-output');
+  const result=document.getElementById('playground-result');
+  output.style.display='block';
+  output.classList.remove('error');
+  
+  // Simulate output based on command
+  if(code.includes('--jira'))result.textContent=demoOutputs.jira;
+  else if(code.includes('--review'))result.textContent=demoOutputs.review;
+  else result.textContent=demoOutputs.default;
+  
+  output.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 </script>
 </body>
 </html>
